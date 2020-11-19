@@ -27,6 +27,14 @@ void PlayScene2::update()
 {
 	m_updateUI();
 	updateDisplayList();
+
+	updateGameObjects();
+	updateLabels();
+
+
+
+	
+
 }
 
 void PlayScene2::clean()
@@ -70,6 +78,9 @@ void PlayScene2::handleEvents()
 			case SDLK_1:
 				TheGame::Instance()->changeSceneState(PLAY_SCENE);
 				ImGui::EndFrame();
+				break;
+			case SDLK_SPACE:
+				m_pBrickSpite->pause = !m_pBrickSpite->pause;
 				break;
 			}
 			{
@@ -125,17 +136,12 @@ void PlayScene2::start()
 
 	m_updateUI();
 
+	initGameObjects();
 
-	//This is where need to instatiate class objects
-		//Target Sprite(Thermal Detonator)
-		//m_pLootCrate = new Target();
-		//m_pLootCrate->setParent(this);
-		//addChild(m_pLootCrate);
+	initLabels();
 
-	// Label ex
-	//m_pDistanceLabel = new Label("Distance", "Consolas", 20, black, glm::vec2(596.0f, 30.0f));
-	//m_pDistanceLabel->setParent(this);
-	//addChild(m_pDistanceLabel);
+
+
 
 
 
@@ -277,4 +283,32 @@ void PlayScene2::m_updateUI()
 
 	// Main Window End
 	ImGui::End();
+}
+
+void PlayScene2::initLabels()
+{
+	m_pBrickVelocity = new Label("Brick Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 30.0f));
+	m_pBrickVelocity->setParent(this);
+	addChild(m_pBrickVelocity);
+
+	m_pPPM = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", 20, white, glm::vec2(670.0f, 570.0f));
+	m_pPPM->setParent(this);
+	addChild(m_pPPM);
+}
+
+void PlayScene2::initGameObjects()
+{
+	m_pBrickSpite = new Brick();
+	m_pBrickSpite->setParent(this);
+	addChild(m_pBrickSpite);
+}
+
+void PlayScene2::updateLabels()
+{
+	m_pBrickVelocity->setText("Brick Velocity: " + std::to_string(Util::magnitude(m_pBrickSpite->getRigidBody()->velocity)));
+}
+
+void PlayScene2::updateGameObjects()
+{
+	m_pBrickSpite->brickMovement(m_mousePosition);
 }

@@ -172,9 +172,9 @@ void PlayScene::start()
 	m_updateUI();
 
 	//Target Sprite(Thermal Detonator)
-	//m_pLootCrate = new Target();
-	//m_pLootCrate->setParent(this);
-	//addChild(m_pLootCrate);
+	m_pLootCrate = new Target();
+	m_pLootCrate->setParent(this);
+	addChild(m_pLootCrate);
 
 
 	// Label

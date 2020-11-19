@@ -58,17 +58,18 @@ private:
 	glm::vec2 m_direction;
 	float m_rotateTarget;
 	float m_frictionCoefficient;
-	float m_acceleraton;
 	float m_speedThrown;
-	float m_force;
 	float m_theta;
-	float m_mass;
 	float m_PPM;
 	float m_MaxSpeed;
-	bool m_beginSimulation;
 	bool m_onGround;
 	bool m_deccelerationCalculated;
 	bool m_atMaxSpeed;
+
+	float m_acceleraton;
+	float m_force;
+	float m_mass;
+	bool m_beginSimulation;
 
 	void m_move();
 	void m_checkBounds();
