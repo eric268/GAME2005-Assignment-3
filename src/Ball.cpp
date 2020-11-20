@@ -236,13 +236,31 @@ void Ball::updateVelocity()
 	
 		if (collisionType == LEFT_WALL_COLLISION || collisionType == RIGHT_WALL_COLLISION)
 		{
+			if (collisionType == LEFT_WALL_COLLISION)
+			{
+				getTransform()->position.x += 10;
+
+			}
+			if (collisionType == RIGHT_WALL_COLLISION)
+			{
+				getTransform()->position.x -= 10;
+			}
+
 			velocityAfterWallCollision();
 			getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
 			collisionType = NO_WALL_COLLISION;
 			collisionJustHappened = true;
 		}
-		else if (collisionType == FLOOR_COLLISION || collisionType == CEILING_COLLISION)
+		 if (collisionType == FLOOR_COLLISION || collisionType == CEILING_COLLISION)
 		{
+			 if (collisionType == FLOOR_COLLISION)
+			 {
+				 getTransform()->position.y -= 10;
+			 }
+			 if (collisionType == CEILING_COLLISION)
+			 {
+				 getTransform()->position.y += 10;
+			 }
 			velocityAfterWallCollision();
 			getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
 			collisionType = NO_WALL_COLLISION;

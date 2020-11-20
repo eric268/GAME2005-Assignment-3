@@ -327,7 +327,7 @@ void PlayScene2::updateGameObjects()
 
 void PlayScene2::checkCollision()
 {
-	if (collisionCounter >= 10)
+	if (collisionCounter >= 7)
 	{
 		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSpite))
 		{
