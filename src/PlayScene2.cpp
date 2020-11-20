@@ -1,6 +1,7 @@
 #include "PlayScene2.h"
 #include "Game.h"
 #include "EventManager.h"
+#include "CollisionManager.h"
 #include "Util.h"
 #include "IMGUI_SDL/imgui_sdl.h"
 #include "Renderer.h"
@@ -31,10 +32,7 @@ void PlayScene2::update()
 	updateGameObjects();
 	updateLabels();
 
-
-
-	
-
+	checkCollision();
 }
 
 void PlayScene2::clean()
@@ -301,6 +299,10 @@ void PlayScene2::initGameObjects()
 	m_pBrickSpite = new Brick();
 	m_pBrickSpite->setParent(this);
 	addChild(m_pBrickSpite);
+
+	m_pBallSprite = new Ball();
+	m_pBallSprite->setParent(this);
+	addChild(m_pBallSprite);
 }
 
 void PlayScene2::updateLabels()
@@ -311,4 +313,12 @@ void PlayScene2::updateLabels()
 void PlayScene2::updateGameObjects()
 {
 	m_pBrickSpite->brickMovement(m_mousePosition);
+}
+
+void PlayScene2::checkCollision()
+{
+	if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSpite))
+	{
+		m_pBallSprite->setCollisionType(BRICK_COLLISION);
+	}
 }

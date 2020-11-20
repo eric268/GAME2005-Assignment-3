@@ -132,7 +132,7 @@ void Brick::calculateVelocity()
 	//Only calculates velocity every 1/6 of a second 
 	if (m_frameCount++ >=10)
 	{
-		getRigidBody()->velocity = (getTransform()->position / m_PPM - m_previousPosition/m_PPM)*6.0f; // Have to measure velocity in m/s not 1/6 of a second
+		getRigidBody()->velocity = (getTransform()->position / m_PPM - m_previousPosition / m_PPM)/(1.0f/6.0f); // Have to measure velocity in m/s not 1/6 of a second
 		m_previousPosition = getTransform()->position;
 		m_frameCount = 0;
 	}

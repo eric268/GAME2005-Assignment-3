@@ -9,6 +9,7 @@
 #include "Enemy.h"
 #include "Target.h"
 #include "Brick.h"
+#include "Ball.h"
 
 class PlayScene2 : public Scene
 {
@@ -35,6 +36,8 @@ public:
 	void updateLabels();
 	void updateGameObjects();
 
+	void checkCollision();
+
 private:
 	// ImGui menu variables
 	bool m_exitApp = false;
@@ -42,6 +45,7 @@ private:
 	bool m_displayUI = true;
 
 	Brick* m_pBrickSpite;
+	Ball* m_pBallSprite;
 	Target* m_pLootCrate;
 
 	Label* m_pBrickVelocity;
