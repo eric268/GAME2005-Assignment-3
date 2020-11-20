@@ -9,120 +9,14 @@ C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\s
           [
               T=float
           ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(46,46): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
+C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(50,46): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(46,43): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
+C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(50,43): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-  Brick.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Brick.cpp(13,15): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Brick.cpp(14,16): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Brick.cpp(40,53): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Brick.cpp(40,50): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Brick.cpp(113,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Brick.cpp(114,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-  EndScene.cpp
-  EventManager.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\EventManager.cpp(76,29): warning C4018: '<': signed/unsigned mismatch
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\EventManager.cpp(133,37): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\EventManager.cpp(134,37): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-  Game.cpp
-  PlayScene.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene.cpp(93,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene.cpp(94,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene.cpp(134,4): warning C4065: switch statement contains 'default' but no 'case' labels
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene.cpp(268,59): warning C4390: ';': empty controlled statement found; is this the intent?
-  PlayScene2.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(57,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(58,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(100,4): warning C4065: switch statement contains 'default' but no 'case' labels
-  StartScene.cpp
-  TextureManager.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(137,36): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(137,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(138,37): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(138,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(180,36): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(180,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(181,37): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(181,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(197,34): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(197,26): warning C4244: 'initializing': conversion from 'float' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(225,33): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(225,26): warning C4244: 'initializing': conversion from 'float' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(232,32): warning C4018: '>': signed/unsigned mismatch
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(260,36): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(260,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(261,37): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(261,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(290,36): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(290,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(291,37): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(291,21): warning C4244: 'initializing': conversion from 'double' to 'const int', possible loss of data
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(310,11): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\TextureManager.cpp(311,11): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-  main.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\main.cpp(9,32): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-  Generating Code...
   Template.vcxproj -> C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\bin\Debug\Template.exe

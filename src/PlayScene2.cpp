@@ -33,6 +33,7 @@ void PlayScene2::update()
 	updateLabels();
 
 	checkCollision();
+
 }
 
 void PlayScene2::clean()
@@ -129,39 +130,43 @@ void PlayScene2::handleEvents()
 
 void PlayScene2::start()
 {
+	initGameObjects();
+	initLabels();
+	initGuiSliderFloats();
 	//Load Background
 	TextureManager::Instance()->load("../Assets/textures/Brick2.jpg", "Brick");
 
 	m_updateUI();
 
-	initGameObjects();
-
-	initLabels();
-
-
-
-
-
-
 }
 
 void PlayScene2::checkGuiChangs()
 {
-	//		GUI Button
-	//	if (ImGui::Button(""))
-	//	{
-	//	}
-	//	ImGui::SameLine();
-
+			//GUI Button
+		if (ImGui::Button("Begin Simulation"))
+		{
+			m_pBallSprite->setBeginSimulation(true);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Pause Simulation"))
+		{
+			m_pBallSprite->setBeginSimulation(false);
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset Simulation"))
+		{
+			resetScene();
+		}
 
 		/*if (ImGui::Checkbox("text", &boolean))
 		{
 		}*/
 
-	//	// Slider Settings
-	//	if (ImGui::SliderFloat("text ", &float, min, max));
-	//	{
-	//	}
+		// Slider Settings
+		if (ImGui::SliderFloat("Wall Absorbtion % ", &GuiSliderFloats[0], 0.1f, 0.9f));
+		{
+			m_pBallSprite->setWallAbsorbtion(GuiSliderFloats[0]);
+		}
 }
 
 void PlayScene2::m_ImGuiKeyMap()
@@ -285,9 +290,9 @@ void PlayScene2::m_updateUI()
 
 void PlayScene2::initLabels()
 {
-	m_pBrickVelocity = new Label("Brick Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 30.0f));
-	m_pBrickVelocity->setParent(this);
-	addChild(m_pBrickVelocity);
+	m_pBrickVelocityLabel = new Label("Brick Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 30.0f));
+	m_pBrickVelocityLabel->setParent(this);
+	addChild(m_pBrickVelocityLabel);
 
 	m_pPPM = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", 20, white, glm::vec2(670.0f, 570.0f));
 	m_pPPM->setParent(this);
@@ -305,9 +310,14 @@ void PlayScene2::initGameObjects()
 	addChild(m_pBallSprite);
 }
 
+void PlayScene2::initGuiSliderFloats()
+{
+	GuiSliderFloats[0] = m_pBallSprite->getWallAbsorbtion();
+}
+
 void PlayScene2::updateLabels()
 {
-	m_pBrickVelocity->setText("Brick Velocity: " + std::to_string(Util::magnitude(m_pBrickSpite->getRigidBody()->velocity)));
+	m_pBrickVelocityLabel->setText("Brick Velocity: " + std::to_string(Util::magnitude(m_pBrickSpite->getRigidBody()->velocity)));
 }
 
 void PlayScene2::updateGameObjects()
@@ -317,8 +327,31 @@ void PlayScene2::updateGameObjects()
 
 void PlayScene2::checkCollision()
 {
-	if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSpite))
+	if (collisionCounter >= 10)
 	{
-		m_pBallSprite->setCollisionType(BRICK_COLLISION);
+		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSpite))
+		{
+			m_pBallSprite->setCollisionType(BRICK_COLLISION);
+			m_pBallSprite->setBrickWeight(m_pBrickSpite->getMass());
+			m_pBallSprite->setBrickVelocity(m_pBrickSpite->getRigidBody()->velocity);
+			m_pBallSprite->setBrickPosition(m_pBrickSpite->getTransform()->position);
+			collisionCounter = 0;
+
+		}
 	}
+	collisionCounter++;
+	
+}
+
+void PlayScene2::resetScene()
+{
+	m_pBallSprite->getTransform()->position = glm::vec2(135.0f, 200.0f);
+	m_pBallSprite->getRigidBody()->velocity = glm::vec2(250.0f, 250.0f);
+	m_pBallSprite->setBeginSimulation(false);
+
+}
+
+void PlayScene2::changeScene()
+{
+
 }

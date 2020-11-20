@@ -16,10 +16,11 @@ public:
 	virtual void update() override;
 	virtual void clean() override;
 
-	WallCollison getCollisionType();
 	void updateVelocity();
 	void calculateMomentum();
-	void velocityAfterCollision(float, float);
+	void velocityAfterCollision(float, glm::vec2);
+	void velocityAfterWallCollision();
+	void changeYBrickCollision();
 
 	//Setters
 	void setCollisionType(WallCollison);
@@ -28,23 +29,35 @@ public:
 	void setForce(float);
 	void setMass(float);
 	void setBeginSimulation(bool);
-	void setWallWeight(float);
-	void setMomentum(float);
+	void setWallAbsorbtion(float);
+	void setMomentum(glm::vec2);
+	void setBrickWeight(float);
+	void setBrickVelocity(glm::vec2);
+	void setBrickCollisionHappened(bool);
+	void setBrickPosition(glm::vec2);
 
 	//Getters
+	WallCollison getCollisionType();
 	void checkCollisionWalls();
 	glm::vec2 getDirection();
 	float getAcceleration();
 	float getForce();
 	float getMass();
 	bool getBeginSimulation();
-	float getWallWeight();
-	float getMomentum();
+	float getWallAbsorbtion();
+	glm::vec2 getMomentum();
+	float getPaddleWeight();
+	glm::vec2 getPaddleVelocity();
+	bool getPaddleCollisionHappened();
+	glm::vec2 getPaddlePosition();
 
 private:
 	glm::vec2 m_direction;
 	glm::vec2 m_mousePosition;
 	glm::vec2 m_previousPosition;
+	glm::vec2 m_momentum;
+	glm::vec2 m_BrickVelocity;
+	glm::vec2 m_brickPosition;
 
 	float m_acceleraton;
 	float m_force;
@@ -52,10 +65,11 @@ private:
 	bool m_beginSimulation;
 	int m_frameCount;
 	float m_PPM;
-	float m_wallWeight;
-	float m_momentum;
+	float m_wallVelAbsorbtion;
 	int collisionCheckCounter;
 	bool collisionJustHappened;
+	bool paddleCollisionHappened;
+	float m_paddleWeight;
 
 	WallCollison collisionType;
 

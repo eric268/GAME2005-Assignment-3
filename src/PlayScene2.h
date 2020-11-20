@@ -32,11 +32,17 @@ public:
 
 	void initLabels();
 	void initGameObjects();
+	void initGuiSliderFloats();
 
 	void updateLabels();
 	void updateGameObjects();
 
 	void checkCollision();
+
+	void resetScene();
+	void changeScene();
+	
+	float GuiSliderFloats[5];
 
 private:
 	// ImGui menu variables
@@ -48,8 +54,10 @@ private:
 	Ball* m_pBallSprite;
 	Target* m_pLootCrate;
 
-	Label* m_pBrickVelocity;
+	Label* m_pBrickVelocityLabel;
 	Label* m_pPPM;
+
+	int collisionCounter =0;
 
 	SDL_Color black = { 0,0,0,225 };
 	SDL_Color white = { 225,225,225,225 };
