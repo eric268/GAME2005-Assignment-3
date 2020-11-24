@@ -14,8 +14,8 @@ Ball::Ball()
 	setWidth(size.x);
 	setHeight(size.y);
 
-	getTransform()->position = glm::vec2(135.0f, 200.0f);
-	getRigidBody()->velocity = glm::vec2(250.0f, 250.0f);
+	getTransform()->position = glm::vec2(400.0f, 300.0f);
+	getRigidBody()->velocity = glm::vec2(2.5f, 2.5f);
 	getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 
 	m_direction = glm::vec2(0.0f);
@@ -210,6 +210,11 @@ void Ball::setBrickHeight(float brickHeight)
 	m_brickHeight = brickHeight;
 }
 
+void Ball::setCollisionJustHappened(bool collision)
+{
+	m_collisionJustHappened = collision;
+}
+
 float Ball::getPaddleWeight()
 {
 	return m_paddleWeight;
@@ -308,13 +313,22 @@ void Ball::changeYBrickCollision()
 
 void Ball::changeXBrickCollision()
 {
-	if (m_brickPosition.x > getTransform()->position.x && getRigidBody()->velocity.x > 0)
+	if (m_brickPosition.x > getTransform()->position.x)
 	{
-		getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
+		getTransform()->position.x = m_brickPosition.x - m_brickWidth / 2 - getWidth() / 2;
+		if (getRigidBody()->velocity.x > 0)
+		{
+			getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
+		}
+
 	}
-	else if (m_brickPosition.x < getTransform()->position.x && getRigidBody()->velocity.x < 0)
+	else if (m_brickPosition.x < getTransform()->position.x )
 	{
-		getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
+		getTransform()->position.x = m_brickPosition.x + m_brickWidth / 2 + getWidth() / 2;
+		if (getRigidBody()->velocity.x < 0)
+		{
+			getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
+		}
 	}
 }
 
@@ -386,12 +400,6 @@ void Ball::updateVelocity()
 
 		}
 
-		collisionCheckCounter = 0;
-	//}
-	//else
-	//{
-		collisionCheckCounter++;
-	//}
 
 }
 

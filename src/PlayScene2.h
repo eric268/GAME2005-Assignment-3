@@ -31,7 +31,7 @@ public:
 	void m_ImGuiSetStyle();
 	void m_updateUI();
 
-	void initLabels();
+	void initLabels(int, SDL_Color);
 	void initMemberVariables();
 	void initGameObjects();
 	void initGuiSliderVariables();
@@ -41,9 +41,10 @@ public:
 	void updateOrientation(BrickOrientation);
 	void checkCollision();
 	void calculateAverageBrickVel();
+	void calcAverageBrickMomentum();
 
 	void resetScene();
-	void changeScene();
+	void updateStartingVelocity();
 	
 	float GuiSliderFloats[5];
 
@@ -63,20 +64,31 @@ private:
 	Label* m_pBrickVelocityLabel;
 	Label* m_pPPMLabel;
 	Label* m_pKeepUpScoreLabel;
-	Label* m_highScoreLabel;
+	Label* m_pHighScoreLabel;
 	Label* m_pBallVelocityLabel;
+	Label* m_pMaxSpeedLabel;
+	Label* m_pBallMomentumLabel;
+	Label* m_pBrickMomentumLabel;
 
 	int collisionCounter;
-	int ballVelocityCounter;
+	
 	int brickVelocityCounter;
 	float averageBrickVelocity;
 	float avgBrickVelTemp;
-	float averageBallVelocity;
-	float avgBallVelTemp;
+
+	int brickMomentumCounter;
+	float avgBrickMomentumTemp;
+	float avgerageBrickMomentum;
+	float startingAngle;
+	float prevVelocity;
+	float maxSpeed;
+
+	glm::vec2 coordinates;
 
 
 	SDL_Color black = { 0,0,0,225 };
 	SDL_Color white = { 225,225,225,225 };
+	SDL_Color red = { 225,0,0,225 };
 
 	bool m_changeScene;
 

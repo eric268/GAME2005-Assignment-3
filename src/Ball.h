@@ -43,6 +43,7 @@ public:
 	void setHighScore(int);
 	void setBrickWidth(float);
 	void setBrickHeight(float);
+	void setCollisionJustHappened(bool);
 
 	//Getters
 	WallCollison getCollisionType();

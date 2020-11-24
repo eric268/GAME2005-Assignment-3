@@ -34,6 +34,7 @@ void PlayScene2::update()
 	checkCollision();
 
 	calculateAverageBrickVel();
+	calcAverageBrickMomentum();
 
 }
 
@@ -132,10 +133,10 @@ void PlayScene2::handleEvents()
 void PlayScene2::start()
 {
 	initGameObjects();
-	initLabels();
+	initLabels(20, white);
 	initMemberVariables();
 	//Load Background
-	TextureManager::Instance()->load("../Assets/textures/Brick2.jpg", "Brick");
+	TextureManager::Instance()->load("../Assets/textures/Pendulum.jpg", "Brick");
 
 	m_pBallSprite->setBrickWidth(m_pBrickSprite->getWidth());
 	m_pBallSprite->setBrickHeight(m_pBrickSprite->getHeight());
@@ -150,6 +151,8 @@ void PlayScene2::checkGuiChangs()
 		if (ImGui::Button("Begin Simulation"))
 		{
 			m_pBallSprite->setBeginSimulation(true);
+
+
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Pause Simulation"))
@@ -203,6 +206,14 @@ void PlayScene2::checkGuiChangs()
 		{
 			m_pBrickSprite->setMass(GuiSliderFloats[2]);
 		}
+		if (ImGui::SliderFloat("Ball Starting Velocity ", &GuiSliderFloats[3], 0.5f, 10.0f));
+		{
+			if (prevVelocity != GuiSliderFloats[3])
+			{
+				updateStartingVelocity();
+			}
+		}
+
 }
 
 void PlayScene2::m_ImGuiKeyMap()
@@ -311,7 +322,7 @@ void PlayScene2::m_updateUI()
 	}
 	if (m_displayAbout)
 	{
-		ImGui::Begin("Projectile Tragectory", &m_displayAbout, ImGuiWindowFlags_AlwaysAutoResize);
+		ImGui::Begin("2D Collisions", &m_displayAbout, ImGuiWindowFlags_AlwaysAutoResize);
 		ImGui::Separator();
 		ImGui::Text("Authors:");
 		ImGui::Text("Eric Galway & Ian Chapman ");
@@ -324,32 +335,39 @@ void PlayScene2::m_updateUI()
 	ImGui::End();
 }
 
-void PlayScene2::initLabels()
+void PlayScene2::initLabels(int font, SDL_Color color)
 {
-	m_highScoreLabel = new Label("High Score: ", "Consolas", 20, white, glm::vec2(600.0f, 20.0f));
-	m_highScoreLabel->setParent(this);
-	addChild(m_highScoreLabel);
+	m_pHighScoreLabel = new Label("High Score: 0", "Consolas", font, color, glm::vec2(600.0f, 20.0f));
+	m_pHighScoreLabel->setParent(this);
+	addChild(m_pHighScoreLabel);
 
-	m_pKeepUpScoreLabel = new Label("Current Score: ", "Consolas", 20, white, glm::vec2(600.0f, 50.0f));
+	m_pKeepUpScoreLabel = new Label("Current Score: 0", "Consolas", font, color, glm::vec2(600.0f, 50.0f));
 	m_pKeepUpScoreLabel->setParent(this);
 	addChild(m_pKeepUpScoreLabel);
 
-	m_pBrickVelocityLabel = new Label("Brick Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 80.0f));
+	m_pBrickVelocityLabel = new Label("Brick Velocity: 0", "Consolas", font, color, glm::vec2(600.0f, 80.0f));
 	m_pBrickVelocityLabel->setParent(this);
 	addChild(m_pBrickVelocityLabel);
 
-	m_pBallVelocityLabel = new Label("Ball Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 110.0f));
+	m_pBallVelocityLabel = new Label("Ball Velocity: 0", "Consolas", font, color, glm::vec2(600.0f, 110.0f));
 	m_pBallVelocityLabel->setParent(this);
 	addChild(m_pBallVelocityLabel);
 
-	m_pPPMLabel = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", 20, white, glm::vec2(670.0f, 570.0f));
+	m_pMaxSpeedLabel = new Label("Ball Max Speed: 0", "Consolas", font, color, glm::vec2(600.0f, 140.0f));
+	m_pMaxSpeedLabel->setParent(this);
+	addChild(m_pMaxSpeedLabel);
+
+	m_pBallMomentumLabel = new Label("Ball Momentum: 0", "Consolas", font, color, glm::vec2(600.0f, 170.0f));
+	m_pBallMomentumLabel->setParent(this);
+	addChild(m_pBallMomentumLabel);
+
+	m_pBrickMomentumLabel = new Label("Brick Avg Momentum: 0", "Consolas", font, color, glm::vec2(600.0f, 200.0f));
+	m_pBrickMomentumLabel->setParent(this);
+	addChild(m_pBrickMomentumLabel);
+
+	m_pPPMLabel = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", font, color, glm::vec2(670.0f, 570.0f));
 	m_pPPMLabel->setParent(this);
 	addChild(m_pPPMLabel);
-
-
-	
-
-
 }
 
 void PlayScene2::initMemberVariables()
@@ -357,10 +375,14 @@ void PlayScene2::initMemberVariables()
 	brickVelocityCounter = 0.0f;
 	averageBrickVelocity = 0;
 	avgBrickVelTemp = 0.0f;
+
 	collisionCounter = 0;
-	ballVelocityCounter = 0;
-	averageBallVelocity = 0.0f;
-	avgBallVelTemp =0.0f;
+
+	brickMomentumCounter =0;
+	avgBrickMomentumTemp =0;
+	avgerageBrickMomentum=0;
+
+	maxSpeed = 0.0f;
 
 	initGuiSliderVariables();
 }
@@ -383,6 +405,7 @@ void PlayScene2::initGuiSliderVariables()
 	GuiSliderFloats[0] = m_pBallSprite->getWallAbsorbtion();
 	GuiSliderFloats[1] = m_pBallSprite->getMass();
 	GuiSliderFloats[2] = m_pBrickSprite->getMass();
+	GuiSliderFloats[3] = 2.0f;
 
 	//Bools
 	GuiSliderBools[0] = false;
@@ -391,19 +414,24 @@ void PlayScene2::initGuiSliderVariables()
 
 void PlayScene2::updateLabels()
 {
-	m_pBrickVelocityLabel->setText("Average Brick Velocity: " + std::to_string(averageBrickVelocity) + "m/s^2");
+	m_pBrickVelocityLabel->setText("Avg. Brick Velocity: " + std::to_string(averageBrickVelocity) + "m/s^2");
 
 	if (m_pBallSprite->getCollisionJustHappened())
 	{
 		m_pBallVelocityLabel->setText("Ball Velocity: " + std::to_string(Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM) + "m/s^2");
+		if (maxSpeed < (Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM))
+		{
+			maxSpeed = (Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM);
+		}
+		m_pBallMomentumLabel->setText("Ball Momentum: " + std::to_string(Util::magnitude(m_pBallSprite->getMomentum())) + "kg*m/s");
 	}
+	m_pBrickMomentumLabel->setText("Avg. Brick Momentum: " + std::to_string(avgerageBrickMomentum) + "kg*m/s");
 
 	m_pKeepUpScoreLabel->setText("Current Score: " + std::to_string(m_pBallSprite->getKeepUpScore()));
 
-	m_highScoreLabel->setText("High Score: " + std::to_string(m_pBallSprite->getHighScore()));
+	m_pHighScoreLabel->setText("High Score: " + std::to_string(m_pBallSprite->getHighScore()));
 
-
-
+	m_pMaxSpeedLabel->setText("Ball Max Speed: " + std::to_string(maxSpeed) + "m/s");
 }
 
 void PlayScene2::updateGameObjects()
@@ -421,8 +449,9 @@ void PlayScene2::updateOrientation(BrickOrientation orientation)
 
 void PlayScene2::checkCollision()
 {
-
-		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSprite))
+	if (collisionCounter >= 3)
+	{
+		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSprite) && m_pBallSprite->getBeginSimulation())
 		{
 			m_pBallSprite->setCollisionType(BRICK_COLLISION);
 			m_pBallSprite->setBrickWeight(m_pBrickSprite->getMass());
@@ -430,6 +459,8 @@ void PlayScene2::checkCollision()
 			m_pBallSprite->setBrickPosition(m_pBrickSprite->getTransform()->position);
 			collisionCounter = 0;
 		}
+	}
+	collisionCounter++;
 }
 
 void PlayScene2::calculateAverageBrickVel()
@@ -447,10 +478,26 @@ void PlayScene2::calculateAverageBrickVel()
 	}
 }
 
+void PlayScene2::calcAverageBrickMomentum()
+{
+	if (brickMomentumCounter < 59)
+	{
+		avgBrickMomentumTemp += Util::magnitude(m_pBrickSprite->getRigidBody()->velocity)*m_pBrickSprite->getMass();
+		brickMomentumCounter++;
+	}
+	else 
+	{
+		brickMomentumCounter = 0;
+		avgerageBrickMomentum = avgBrickMomentumTemp / 60.0f;
+		avgBrickMomentumTemp = 0;
+	}
+}
+
 void PlayScene2::resetScene()
 {
-	m_pBallSprite->getTransform()->position = glm::vec2(135.0f, 200.0f);
-	m_pBallSprite->getRigidBody()->velocity = glm::vec2(250.0f, 250.0f);
+	m_pBallSprite->getTransform()->position = glm::vec2(400.0f, 300.0f);
+	m_pBallSprite->getRigidBody()->velocity = glm::vec2(2.5f, 2.5f);
+	updateStartingVelocity();
 	m_pBallSprite->setBeginSimulation(false);
 	m_pBallSprite->setWallAbsorbtion(0.1f);
 	m_pBallSprite->setHighScore(0);
@@ -460,12 +507,14 @@ void PlayScene2::resetScene()
 	m_pBallSprite->setMass(2.0f);
 	m_pBrickSprite->setMass(10.0f);
 	initMemberVariables();
-
-
-
+	maxSpeed = 0.0f;
+	m_pBallSprite->setMomentum(glm::vec2(0.0f));
+	m_pBallSprite->setCollisionJustHappened(true);
 }
 
-void PlayScene2::changeScene()
+void PlayScene2::updateStartingVelocity()
 {
-
+		coordinates = Util::normalize(m_pBallSprite->getRigidBody()->velocity);
+		m_pBallSprite->getRigidBody()->velocity = coordinates * GuiSliderFloats[3] * m_PPM;
+		prevVelocity = GuiSliderFloats[3];
 }
