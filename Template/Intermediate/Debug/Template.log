@@ -1,14 +1,22 @@
-﻿  PlayScene2.cpp
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(58,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
+﻿  Ball.cpp
+C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(14,15): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(59,36): warning C4244: '=': conversion from 'Sint32' to 'T', possible loss of data
+C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(15,16): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(101,4): warning C4065: switch statement contains 'default' but no 'case' labels
-C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\PlayScene2.cpp(166,81): warning C4390: ';': empty controlled statement found; is this the intent?
+C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(55,46): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\src\Ball.cpp(55,43): warning C4244: 'argument': conversion from 'const T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
   Template.vcxproj -> C:\Users\eric\Desktop\Game Programming 2020\Physics\GAME2005-F2020-Assignment3\bin\Debug\Template.exe

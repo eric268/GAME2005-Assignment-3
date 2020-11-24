@@ -2,11 +2,13 @@
 #ifndef __BRICK__
 #define __BRICK__
 #include "Sprite.h"
+#include "BrickOrientation.h"
 
 class Brick final : public DisplayObject
 {
 public:
 	Brick();
+	Brick(int);
 	~Brick();
 
 	// Inherited via GameObject
@@ -36,6 +38,9 @@ public:
 
 	bool pause = false;
 
+	BrickOrientation getOrientation();
+	void setOrientation(BrickOrientation);
+
 
 private: 
 	glm::vec2 m_direction;
@@ -48,7 +53,9 @@ private:
 	bool m_beginSimulation;
 	int m_frameCount;
 	float m_PPM;
+	BrickOrientation m_orientation;
 
+	int temp = 0;
 
 
 	void m_move();

@@ -8,6 +8,7 @@
 Brick::Brick()
 {
 	TextureManager::Instance()->load("../Assets/textures/BrickSprite.png", "BrickSprite");
+	TextureManager::Instance()->load("../Assets/textures/BrickSprite2.png", "BrickSpriteVertical");
 
 	auto size = TextureManager::Instance()->getTextureSize("BrickSprite");
 	setWidth(size.x);
@@ -26,7 +27,9 @@ Brick::Brick()
 	m_frameCount = 0;
 	m_PPM = 100;
 	setType(BRICK);
+	m_orientation = HORIZONTAL;
 }
+
 
 Brick::~Brick() = default;
 
@@ -37,7 +40,14 @@ void Brick::draw()
 	const auto y = getTransform()->position.y;
 
 	// draw the target
-	TextureManager::Instance()->draw("BrickSprite", x, y, 0, 255, true);
+	if (m_orientation == VERTICAL)
+	{
+		TextureManager::Instance()->draw("BrickSpriteVertical", x, y, 0, 255, true);
+	}
+	else if (m_orientation == HORIZONTAL)
+	{
+		TextureManager::Instance()->draw("BrickSprite", x, y, 0, 255, true);
+	}
 }
 
 void Brick::update()
@@ -137,6 +147,30 @@ void Brick::calculateVelocity()
 		m_frameCount = 0;
 	//}
 }
+
+BrickOrientation Brick::getOrientation()
+{
+	return m_orientation;
+}
+
+void Brick::setOrientation(BrickOrientation bOrientation)
+{
+	m_orientation = bOrientation;
+	if (m_orientation == VERTICAL)
+	{
+		auto size = TextureManager::Instance()->getTextureSize("BrickSpriteVertical");
+		setWidth(size.x);
+		setHeight(size.y);
+	}
+	else if (m_orientation == HORIZONTAL)
+	{
+		auto size = TextureManager::Instance()->getTextureSize("BrickSprite");
+		setWidth(size.x);
+		setHeight(size.y);
+	}
+}
+
+
 
 void Brick::m_move()
 {

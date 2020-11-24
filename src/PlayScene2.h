@@ -11,6 +11,7 @@
 #include "Brick.h"
 #include "Ball.h"
 
+
 class PlayScene2 : public Scene
 {
 public:
@@ -31,18 +32,22 @@ public:
 	void m_updateUI();
 
 	void initLabels();
+	void initMemberVariables();
 	void initGameObjects();
-	void initGuiSliderFloats();
+	void initGuiSliderVariables();
 
 	void updateLabels();
 	void updateGameObjects();
-
+	void updateOrientation(BrickOrientation);
 	void checkCollision();
+	void calculateAverageBrickVel();
 
 	void resetScene();
 	void changeScene();
 	
 	float GuiSliderFloats[5];
+
+	bool GuiSliderBools[5];
 
 private:
 	// ImGui menu variables
@@ -50,14 +55,25 @@ private:
 	bool m_displayAbout = false;
 	bool m_displayUI = true;
 
-	Brick* m_pBrickSpite;
+	Brick* m_pBrickSprite;
+	Brick* m_pBrickSpiteVertical;
 	Ball* m_pBallSprite;
 	Target* m_pLootCrate;
 
 	Label* m_pBrickVelocityLabel;
-	Label* m_pPPM;
+	Label* m_pPPMLabel;
+	Label* m_pKeepUpScoreLabel;
+	Label* m_highScoreLabel;
+	Label* m_pBallVelocityLabel;
 
-	int collisionCounter =0;
+	int collisionCounter;
+	int ballVelocityCounter;
+	int brickVelocityCounter;
+	float averageBrickVelocity;
+	float avgBrickVelTemp;
+	float averageBallVelocity;
+	float avgBallVelTemp;
+
 
 	SDL_Color black = { 0,0,0,225 };
 	SDL_Color white = { 225,225,225,225 };

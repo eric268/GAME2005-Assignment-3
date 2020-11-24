@@ -284,5 +284,8 @@
     <ClInclude Include="..\src\WallCollision.h">
       <Filter>Enums</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\BrickOrientation.h">
+      <Filter>Enums</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

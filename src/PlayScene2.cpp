@@ -31,8 +31,9 @@ void PlayScene2::update()
 
 	updateGameObjects();
 	updateLabels();
-
 	checkCollision();
+
+	calculateAverageBrickVel();
 
 }
 
@@ -79,7 +80,7 @@ void PlayScene2::handleEvents()
 				ImGui::EndFrame();
 				break;
 			case SDLK_SPACE:
-				m_pBrickSpite->pause = !m_pBrickSpite->pause;
+				m_pBrickSprite->pause = !m_pBrickSprite->pause;
 				break;
 			}
 			{
@@ -132,9 +133,12 @@ void PlayScene2::start()
 {
 	initGameObjects();
 	initLabels();
-	initGuiSliderFloats();
+	initMemberVariables();
 	//Load Background
 	TextureManager::Instance()->load("../Assets/textures/Brick2.jpg", "Brick");
+
+	m_pBallSprite->setBrickWidth(m_pBrickSprite->getWidth());
+	m_pBallSprite->setBrickHeight(m_pBrickSprite->getHeight());
 
 	m_updateUI();
 
@@ -152,20 +156,52 @@ void PlayScene2::checkGuiChangs()
 		{
 			m_pBallSprite->setBeginSimulation(false);
 		}
-		ImGui::SameLine();
 		if (ImGui::Button("Reset Simulation"))
 		{
 			resetScene();
 		}
-
-		/*if (ImGui::Checkbox("text", &boolean))
+		ImGui::SameLine();
+		if (ImGui::Button("Reset HighScore"))
 		{
-		}*/
+			m_pBallSprite->setHighScore(0);
+		}
+
+		if (ImGui::Checkbox("Vertical Paddle", &GuiSliderBools[0]))
+		{
+			if (GuiSliderBools[0] == false)
+			{
+				updateOrientation(HORIZONTAL);
+			}
+			else
+			{
+				updateOrientation(VERTICAL);
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Gravity Enabled", &GuiSliderBools[1]))
+		{
+			if (GuiSliderBools[1])
+			{
+				m_pBallSprite->setGravityEnabled(true);
+			}
+			else
+			{
+				m_pBallSprite->setGravityEnabled(false);
+			}
+		}
 
 		// Slider Settings
-		if (ImGui::SliderFloat("Wall Absorbtion % ", &GuiSliderFloats[0], 0.1f, 0.9f));
+		if (ImGui::SliderFloat("Wall Absorbtion % ", &GuiSliderFloats[0], 0.1f, 1.0f));
 		{
 			m_pBallSprite->setWallAbsorbtion(GuiSliderFloats[0]);
+		}
+		if (ImGui::SliderFloat("Ball Weight ", &GuiSliderFloats[1], 0.2f, 5.0f));
+		{
+			m_pBallSprite->setMass(GuiSliderFloats[1]);
+		}
+		if (ImGui::SliderFloat("Brick Weight ", &GuiSliderFloats[2], 2.0f, 50.0f));
+		{
+			m_pBrickSprite->setMass(GuiSliderFloats[2]);
 		}
 }
 
@@ -290,57 +326,125 @@ void PlayScene2::m_updateUI()
 
 void PlayScene2::initLabels()
 {
-	m_pBrickVelocityLabel = new Label("Brick Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 30.0f));
+	m_highScoreLabel = new Label("High Score: ", "Consolas", 20, white, glm::vec2(600.0f, 20.0f));
+	m_highScoreLabel->setParent(this);
+	addChild(m_highScoreLabel);
+
+	m_pKeepUpScoreLabel = new Label("Current Score: ", "Consolas", 20, white, glm::vec2(600.0f, 50.0f));
+	m_pKeepUpScoreLabel->setParent(this);
+	addChild(m_pKeepUpScoreLabel);
+
+	m_pBrickVelocityLabel = new Label("Brick Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 80.0f));
 	m_pBrickVelocityLabel->setParent(this);
 	addChild(m_pBrickVelocityLabel);
 
-	m_pPPM = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", 20, white, glm::vec2(670.0f, 570.0f));
-	m_pPPM->setParent(this);
-	addChild(m_pPPM);
+	m_pBallVelocityLabel = new Label("Ball Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 110.0f));
+	m_pBallVelocityLabel->setParent(this);
+	addChild(m_pBallVelocityLabel);
+
+	m_pPPMLabel = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", 20, white, glm::vec2(670.0f, 570.0f));
+	m_pPPMLabel->setParent(this);
+	addChild(m_pPPMLabel);
+
+
+	
+
+
+}
+
+void PlayScene2::initMemberVariables()
+{
+	brickVelocityCounter = 0.0f;
+	averageBrickVelocity = 0;
+	avgBrickVelTemp = 0.0f;
+	collisionCounter = 0;
+	ballVelocityCounter = 0;
+	averageBallVelocity = 0.0f;
+	avgBallVelTemp =0.0f;
+
+	initGuiSliderVariables();
 }
 
 void PlayScene2::initGameObjects()
 {
-	m_pBrickSpite = new Brick();
-	m_pBrickSpite->setParent(this);
-	addChild(m_pBrickSpite);
+	m_pBrickSprite = new Brick();
+	m_pBrickSprite->setParent(this);
+	addChild(m_pBrickSprite);
+
 
 	m_pBallSprite = new Ball();
 	m_pBallSprite->setParent(this);
 	addChild(m_pBallSprite);
 }
 
-void PlayScene2::initGuiSliderFloats()
+void PlayScene2::initGuiSliderVariables()
 {
+	// Floats
 	GuiSliderFloats[0] = m_pBallSprite->getWallAbsorbtion();
+	GuiSliderFloats[1] = m_pBallSprite->getMass();
+	GuiSliderFloats[2] = m_pBrickSprite->getMass();
+
+	//Bools
+	GuiSliderBools[0] = false;
+	GuiSliderBools[1] = false;
 }
 
 void PlayScene2::updateLabels()
 {
-	m_pBrickVelocityLabel->setText("Brick Velocity: " + std::to_string(Util::magnitude(m_pBrickSpite->getRigidBody()->velocity)));
+	m_pBrickVelocityLabel->setText("Average Brick Velocity: " + std::to_string(averageBrickVelocity) + "m/s^2");
+
+	if (m_pBallSprite->getCollisionJustHappened())
+	{
+		m_pBallVelocityLabel->setText("Ball Velocity: " + std::to_string(Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM) + "m/s^2");
+	}
+
+	m_pKeepUpScoreLabel->setText("Current Score: " + std::to_string(m_pBallSprite->getKeepUpScore()));
+
+	m_highScoreLabel->setText("High Score: " + std::to_string(m_pBallSprite->getHighScore()));
+
+
+
 }
 
 void PlayScene2::updateGameObjects()
 {
-	m_pBrickSpite->brickMovement(m_mousePosition);
+	m_pBrickSprite->brickMovement(m_mousePosition);
+}
+
+void PlayScene2::updateOrientation(BrickOrientation orientation)
+{
+	m_pBrickSprite->setOrientation(orientation);
+	m_pBallSprite->setBrickOrientation(orientation);
+	m_pBallSprite->setBrickWidth(m_pBrickSprite->getWidth());
+	m_pBallSprite->setBrickHeight(m_pBrickSprite->getHeight());
 }
 
 void PlayScene2::checkCollision()
 {
-	if (collisionCounter >= 7)
-	{
-		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSpite))
+
+		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSprite))
 		{
 			m_pBallSprite->setCollisionType(BRICK_COLLISION);
-			m_pBallSprite->setBrickWeight(m_pBrickSpite->getMass());
-			m_pBallSprite->setBrickVelocity(m_pBrickSpite->getRigidBody()->velocity);
-			m_pBallSprite->setBrickPosition(m_pBrickSpite->getTransform()->position);
+			m_pBallSprite->setBrickWeight(m_pBrickSprite->getMass());
+			m_pBallSprite->setBrickVelocity(m_pBrickSprite->getRigidBody()->velocity);
+			m_pBallSprite->setBrickPosition(m_pBrickSprite->getTransform()->position);
 			collisionCounter = 0;
-
 		}
+}
+
+void PlayScene2::calculateAverageBrickVel()
+{
+	if (brickVelocityCounter < 59)
+	{
+		avgBrickVelTemp += Util::magnitude(m_pBrickSprite->getRigidBody()->velocity);
+		brickVelocityCounter++;
 	}
-	collisionCounter++;
-	
+	else if (brickVelocityCounter >= 59)
+	{
+		brickVelocityCounter = 0;
+		averageBrickVelocity = avgBrickVelTemp / 60.0f;
+		avgBrickVelTemp = 0;
+	}
 }
 
 void PlayScene2::resetScene()
@@ -348,6 +452,16 @@ void PlayScene2::resetScene()
 	m_pBallSprite->getTransform()->position = glm::vec2(135.0f, 200.0f);
 	m_pBallSprite->getRigidBody()->velocity = glm::vec2(250.0f, 250.0f);
 	m_pBallSprite->setBeginSimulation(false);
+	m_pBallSprite->setWallAbsorbtion(0.1f);
+	m_pBallSprite->setHighScore(0);
+	m_pBallSprite->setKeepUpScore(0);
+	m_pBrickSprite->setOrientation(HORIZONTAL);
+	m_pBallSprite->setBrickOrientation(HORIZONTAL);
+	m_pBallSprite->setMass(2.0f);
+	m_pBrickSprite->setMass(10.0f);
+	initMemberVariables();
+
+
 
 }
 

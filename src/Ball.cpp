@@ -31,11 +31,16 @@ Ball::Ball()
 	collisionType = NO_WALL_COLLISION;
 	setType(BALL);
 	collisionCheckCounter = 0;
-	collisionJustHappened = false;
-	m_BrickVelocity = glm::vec2(0.0f);
+	m_collisionJustHappened = true;
+	m_brickVelocity = glm::vec2(0.0f);
 	m_paddleWeight = 0.0f;
 	paddleCollisionHappened = true;
 	m_brickPosition = glm::vec2(0.0f);
+	m_brickOrientation = HORIZONTAL;
+	m_highScore = 0;
+	m_keepUpScore = 0;
+	m_brickHeight = 0.0f;
+	m_brickWidth = 0.0f;
 }
 
 Ball::~Ball() = default;
@@ -119,20 +124,20 @@ void Ball::setBeginSimulation(bool begin)
 
 void Ball::checkCollisionWalls()
 {
-	if (getTransform()->position.x - getWidth() / 2 <= 0 && collisionJustHappened == false)
+	if (getTransform()->position.x - getWidth() / 2 <= 0 && m_collisionJustHappened == false)
 	{
 
 		collisionType =  LEFT_WALL_COLLISION;
 	}
-	else if (getTransform()->position.x + getWidth() / 2 >= 800.0f && collisionJustHappened == false)
+	else if (getTransform()->position.x + getWidth() / 2 >= 800.0f && m_collisionJustHappened == false)
 	{
 		collisionType = RIGHT_WALL_COLLISION;
 	}
-	else if (getTransform()->position.y - getHeight() / 2 <= 0 && collisionJustHappened == false)
+	else if (getTransform()->position.y - getHeight() / 2 <= 0 && m_collisionJustHappened == false)
 	{
 		collisionType = CEILING_COLLISION;
 	}
-	else if (getTransform()->position.y + getHeight() / 2 >= 600 && collisionJustHappened == false)
+	else if (getTransform()->position.y + getHeight() / 2 >= 600 && m_collisionJustHappened == false)
 	{
 		collisionType = FLOOR_COLLISION;
 	}
@@ -162,7 +167,7 @@ void Ball::setBrickWeight(float pW)
 
 void Ball::setBrickVelocity(glm::vec2 pV)
 {
-	m_BrickVelocity = pV;
+	m_brickVelocity = pV;
 }
 
 void Ball::setBrickCollisionHappened(bool pDC)
@@ -175,6 +180,36 @@ void Ball::setBrickPosition(glm::vec2 brickPos)
 	m_brickPosition = brickPos;
 }
 
+void Ball::setBrickOrientation(BrickOrientation brickOrient)
+{
+	m_brickOrientation = brickOrient;
+}
+
+void Ball::setGravityEnabled(bool gravEnabled)
+{
+	m_gravityEnabled = gravEnabled;
+}
+
+void Ball::setKeepUpScore(int keepUpScore)
+{
+	m_keepUpScore = keepUpScore;
+}
+
+void Ball::setHighScore(int highScore)
+{
+	m_highScore = highScore;
+}
+
+void Ball::setBrickWidth(float brickWidth)
+{
+	m_brickWidth = brickWidth;
+}
+
+void Ball::setBrickHeight(float brickHeight)
+{
+	m_brickHeight = brickHeight;
+}
+
 float Ball::getPaddleWeight()
 {
 	return m_paddleWeight;
@@ -182,7 +217,7 @@ float Ball::getPaddleWeight()
 
 glm::vec2 Ball::getPaddleVelocity()
 {
-	return m_BrickVelocity;
+	return m_brickVelocity;
 }
 
 bool Ball::getPaddleCollisionHappened()
@@ -190,10 +225,47 @@ bool Ball::getPaddleCollisionHappened()
 	return paddleCollisionHappened;
 }
 
+bool Ball::getCollisionJustHappened()
+{
+	return m_collisionJustHappened;
+}
+
 glm::vec2 Ball::getPaddlePosition()
 {
 	return m_brickPosition;
 }
+
+BrickOrientation Ball::getBrickOrientation()
+{
+	return m_brickOrientation;
+}
+
+bool Ball::getGravityEnabled()
+{
+	return m_gravityEnabled;
+}
+
+int Ball::getKeepUpScore()
+{
+	return m_keepUpScore;
+}
+
+int Ball::getHighScore()
+{
+	return m_highScore;
+}
+
+float Ball::getBrickWidth()
+{
+	return m_brickWidth;
+}
+
+float Ball::getBrickHeight()
+{
+	return m_brickHeight;
+}
+
+
 
 void Ball::setMomentum(glm::vec2 momentum)
 {
@@ -213,58 +285,105 @@ void Ball::setCollisionType(WallCollison collision)
 }
 void Ball::changeYBrickCollision()
 {
-	if (m_brickPosition.y > getTransform()->position.y && getRigidBody()->velocity.y > 0)
+	if (m_brickPosition.y > getTransform()->position.y )
 	{
-		getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
+		//This offsets whatever overlap there is between Brick and ball during collision
+		getTransform()->position.y = m_brickPosition.y - m_brickHeight/2 - getHeight() / 2 ;
+
+		if (getRigidBody()->velocity.y > 0)
+		{
+			getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
+		}
 	}
-	else if (m_brickPosition.y < getTransform()->position.y && getRigidBody()->velocity.y < 0)
+	else if (m_brickPosition.y < getTransform()->position.y )
 	{
-		getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
+		getTransform()->position.y = m_brickPosition.y + m_brickHeight/2 + getHeight() / 2;
+
+		if (getRigidBody()->velocity.y < 0)
+		{
+			getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
+		}
+	}
+}
+
+void Ball::changeXBrickCollision()
+{
+	if (m_brickPosition.x > getTransform()->position.x && getRigidBody()->velocity.x > 0)
+	{
+		getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
+	}
+	else if (m_brickPosition.x < getTransform()->position.x && getRigidBody()->velocity.x < 0)
+	{
+		getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
 	}
 }
 
 void Ball::updateVelocity()
 {
+	m_collisionJustHappened = false;
 	if (collisionType == BRICK_COLLISION)
 	{
-		velocityAfterCollision(m_paddleWeight, m_BrickVelocity);
-		changeYBrickCollision();
+		m_keepUpScore++;
+		velocityAfterCollision(m_paddleWeight, m_brickVelocity);
+		if (m_brickOrientation == HORIZONTAL)
+		{
+			changeYBrickCollision();
+		}
+		else if (m_brickOrientation == VERTICAL)
+		{
+			changeXBrickCollision();
+		}
+		m_collisionJustHappened = true;
 		collisionType = NO_WALL_COLLISION;
 	}
-	
-		collisionJustHappened = false;
 	
 		if (collisionType == LEFT_WALL_COLLISION || collisionType == RIGHT_WALL_COLLISION)
 		{
 			if (collisionType == LEFT_WALL_COLLISION)
 			{
-				getTransform()->position.x += 10;
+				float temp = getTransform()->position.x - getWidth() / 2;
+				temp = 0 - temp;
+				getTransform()->position.x += temp;
 
 			}
 			if (collisionType == RIGHT_WALL_COLLISION)
 			{
-				getTransform()->position.x -= 10;
+				float temp = getTransform()->position.x + getWidth() / 2;
+				temp = 800 - temp;
+				getTransform()->position.x += temp;
 			}
 
 			velocityAfterWallCollision();
 			getRigidBody()->velocity.x = -getRigidBody()->velocity.x;
 			collisionType = NO_WALL_COLLISION;
-			collisionJustHappened = true;
+			m_collisionJustHappened = true;
 		}
 		 if (collisionType == FLOOR_COLLISION || collisionType == CEILING_COLLISION)
 		{
 			 if (collisionType == FLOOR_COLLISION)
 			 {
-				 getTransform()->position.y -= 10;
+				 float temp = getTransform()->position.y + getHeight() / 2;
+				 temp = 600 - temp;
+				 getTransform()->position.y += temp;
+				
+				 if (m_highScore < m_keepUpScore)
+				 {
+					 m_highScore = m_keepUpScore;
+				 }
+				 m_keepUpScore = 0;
 			 }
 			 if (collisionType == CEILING_COLLISION)
 			 {
-				 getTransform()->position.y += 10;
+				 float temp = getTransform()->position.y - getHeight() / 2;
+				 temp = 0 - temp;
+				 getTransform()->position.y += temp;
 			 }
 			velocityAfterWallCollision();
 			getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
 			collisionType = NO_WALL_COLLISION;
-			collisionJustHappened = true;
+			m_collisionJustHappened = true;
+
+
 		}
 
 		collisionCheckCounter = 0;
@@ -279,7 +398,7 @@ void Ball::updateVelocity()
 void Ball::calculateMomentum()
 {
 	m_momentum = (m_mass * getRigidBody()->velocity)/m_PPM;
-	std::cout << Util::magnitude(m_momentum) << std::endl;
+	//std::cout << Util::magnitude(m_momentum) << std::endl;
 }
 
 void Ball::velocityAfterCollision(float otherWeight, glm::vec2 otherVelocity)
@@ -291,10 +410,10 @@ void Ball::velocityAfterCollision(float otherWeight, glm::vec2 otherVelocity)
 	assert(totalMass > 0);
 
 	glm::vec2 newVelocity = totalMomentumBefore / totalMass;
-	float percentChangeVel = Util::magnitude(newVelocity) / (Util::magnitude(getRigidBody()->velocity)/m_PPM);
+	//percentChangeVel = Util::magnitude(newVelocity) / (Util::magnitude(getRigidBody()->velocity)/m_PPM);
 
-	getRigidBody()->velocity.x *= percentChangeVel;
-	getRigidBody()->velocity.y *= percentChangeVel;
+	getRigidBody()->velocity = newVelocity*m_PPM;
+
 }
 
 void Ball::velocityAfterWallCollision()
@@ -308,6 +427,16 @@ void Ball::velocityAfterWallCollision()
 void Ball::m_move()
 {
 	float deltaTime = 1.0f / 60.0f;
+
+	if (m_gravityEnabled)
+	{
+		getRigidBody()->acceleration.y = m_gravity;
+		getRigidBody()->velocity += (getRigidBody()->acceleration * m_PPM) * deltaTime;
+	}
+	else
+	{
+		getRigidBody()->acceleration = glm::vec2(0.0f);
+	}
 
 	glm::vec2 pos = getTransform()->position;
 	pos.x += getRigidBody()->velocity.x * deltaTime;

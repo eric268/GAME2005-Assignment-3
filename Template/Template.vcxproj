@@ -204,6 +204,7 @@
     <ClInclude Include="..\src\Animation.h" />
     <ClInclude Include="..\src\Ball.h" />
     <ClInclude Include="..\src\Brick.h" />
+    <ClInclude Include="..\src\BrickOrientation.h" />
     <ClInclude Include="..\src\Button.h" />
     <ClInclude Include="..\src\CollisionManager.h" />
     <ClInclude Include="..\src\CollisionShape.h" />
