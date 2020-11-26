@@ -7,8 +7,8 @@
 
 Brick::Brick()
 {
-	TextureManager::Instance()->load("../Assets/textures/BrickSprite.png", "BrickSprite");
-	TextureManager::Instance()->load("../Assets/textures/BrickSprite2.png", "BrickSpriteVertical");
+	TextureManager::Instance()->load("../Assets/textures/BrickSpriteThick.png", "BrickSprite");
+	TextureManager::Instance()->load("../Assets/textures/BrickSprite2Thick.png", "BrickSpriteVertical");
 
 	auto size = TextureManager::Instance()->getTextureSize("BrickSprite");
 	setWidth(size.x);

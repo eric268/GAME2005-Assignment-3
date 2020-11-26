@@ -53,15 +53,22 @@ void PlayScene2::handleEvents()
 	{
 		switch (event.type)
 		{
+
 		case SDL_QUIT:
 			TheGame::Instance()->quit();
 			break;
 		case SDL_MOUSEMOTION:
 			m_mousePosition.x = event.motion.x;
 			m_mousePosition.y = event.motion.y;
+			if (GuiSliderBools[2])
+			{
+				TheGame::Instance()->changeSceneState(PLAY_SCENE);
+				ImGui::EndFrame();
+			}
 			break;
 		case SDL_MOUSEWHEEL:
 			wheel = event.wheel.y;
+
 			break;
 
 		case SDL_TEXTINPUT:
@@ -81,10 +88,11 @@ void PlayScene2::handleEvents()
 				ImGui::EndFrame();
 				break;
 			case SDLK_SPACE:
-				m_pBrickSprite->pause = !m_pBrickSprite->pause;
+				system("CLS");
 				break;
 			}
 			{
+
 				const int key = event.key.keysym.scancode;
 				IM_ASSERT(key >= 0 && key < IM_ARRAYSIZE(io.KeysDown));
 				io.KeysDown[key] = (event.type == SDL_KEYDOWN);
@@ -151,8 +159,6 @@ void PlayScene2::checkGuiChangs()
 		if (ImGui::Button("Begin Simulation"))
 		{
 			m_pBallSprite->setBeginSimulation(true);
-
-
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Pause Simulation"))
@@ -167,6 +173,10 @@ void PlayScene2::checkGuiChangs()
 		if (ImGui::Button("Reset HighScore"))
 		{
 			m_pBallSprite->setHighScore(0);
+		}
+		if (ImGui::Button("Change Scene"))
+		{
+			GuiSliderBools[2] = true;
 		}
 
 		if (ImGui::Checkbox("Vertical Paddle", &GuiSliderBools[0]))
@@ -190,6 +200,49 @@ void PlayScene2::checkGuiChangs()
 			else
 			{
 				m_pBallSprite->setGravityEnabled(false);
+			}
+		}
+		if (ImGui::Checkbox("Circle", &GuiSliderBools[3]))
+		{
+			if (GuiSliderBools[3])
+			{
+				m_pBallSprite->setShape(CIRCLE);
+				GuiSliderBools[4] = false;
+				GuiSliderBools[5] = false;
+				GuiSliderBools[6] = false;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Square", &GuiSliderBools[4]))
+		{
+			if (GuiSliderBools[4])
+			{
+				m_pBallSprite->setShape(SQUARE);
+				GuiSliderBools[3] = false;
+				GuiSliderBools[5] = false;
+				GuiSliderBools[6] = false;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Triangle", &GuiSliderBools[5]))
+		{
+			if (GuiSliderBools[5])
+			{
+				m_pBallSprite->setShape(TRIANGLE);
+				GuiSliderBools[3] = false;
+				GuiSliderBools[4] = false;
+				GuiSliderBools[6] = false;
+			}
+		}
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Hexagon", &GuiSliderBools[6]))
+		{
+			if (GuiSliderBools[6])
+			{
+				m_pBallSprite->setShape(HEXAGON);
+				GuiSliderBools[3] = false;
+				GuiSliderBools[4] = false;
+				GuiSliderBools[5] = false;
 			}
 		}
 
@@ -365,7 +418,11 @@ void PlayScene2::initLabels(int font, SDL_Color color)
 	m_pBrickMomentumLabel->setParent(this);
 	addChild(m_pBrickMomentumLabel);
 
-	m_pPPMLabel = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", font, color, glm::vec2(670.0f, 570.0f));
+	m_pChangeSceneNote = new Label("Press 1 to change scene", "Consolas", 15, color, glm::vec2(110.0f, 580.0f));
+	m_pChangeSceneNote->setParent(this);
+	addChild(m_pChangeSceneNote);
+
+	m_pPPMLabel = new Label("Scale: " + std::to_string(m_PPM) + " PPM", "Consolas", 15, color, glm::vec2(670.0f, 580.0f));
 	m_pPPMLabel->setParent(this);
 	addChild(m_pPPMLabel);
 }
@@ -410,28 +467,33 @@ void PlayScene2::initGuiSliderVariables()
 	//Bools
 	GuiSliderBools[0] = false;
 	GuiSliderBools[1] = false;
+	GuiSliderBools[2] = false;
+	GuiSliderBools[3] = true; //This is for object shape isCircle
+	GuiSliderBools[4] = false; //This is for object shape isSquare
+	GuiSliderBools[5] = false; //This is for object shape isTriangle
+	GuiSliderBools[6] = false; //This is for object shape isPentagon
 }
 
 void PlayScene2::updateLabels()
 {
-	m_pBrickVelocityLabel->setText("Avg. Brick Velocity: " + std::to_string(averageBrickVelocity) + "m/s^2");
+	m_pBrickVelocityLabel->setText("Avg. Brick Velocity: " + std::to_string(averageBrickVelocity) + " m/s^2");
 
 	if (m_pBallSprite->getCollisionJustHappened())
 	{
-		m_pBallVelocityLabel->setText("Ball Velocity: " + std::to_string(Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM) + "m/s^2");
+		m_pBallVelocityLabel->setText("Ball Velocity: " + std::to_string(Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM) + " m/s^2");
 		if (maxSpeed < (Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM))
 		{
 			maxSpeed = (Util::magnitude(m_pBallSprite->getRigidBody()->velocity) / m_PPM);
 		}
-		m_pBallMomentumLabel->setText("Ball Momentum: " + std::to_string(Util::magnitude(m_pBallSprite->getMomentum())) + "kg*m/s");
+		m_pBallMomentumLabel->setText("Ball Momentum: " + std::to_string(Util::magnitude(m_pBallSprite->getMomentum())) + " kg*m/s");
 	}
-	m_pBrickMomentumLabel->setText("Avg. Brick Momentum: " + std::to_string(avgerageBrickMomentum) + "kg*m/s");
+	m_pBrickMomentumLabel->setText("Avg. Brick Momentum: " + std::to_string(avgerageBrickMomentum) + " kg*m/s");
 
 	m_pKeepUpScoreLabel->setText("Current Score: " + std::to_string(m_pBallSprite->getKeepUpScore()));
 
 	m_pHighScoreLabel->setText("High Score: " + std::to_string(m_pBallSprite->getHighScore()));
 
-	m_pMaxSpeedLabel->setText("Ball Max Speed: " + std::to_string(maxSpeed) + "m/s");
+	m_pMaxSpeedLabel->setText("Ball Max Speed: " + std::to_string(maxSpeed) + " m/s");
 }
 
 void PlayScene2::updateGameObjects()
@@ -449,18 +511,26 @@ void PlayScene2::updateOrientation(BrickOrientation orientation)
 
 void PlayScene2::checkCollision()
 {
-	if (collisionCounter >= 3)
+	if (Util::distance(m_pBallSprite->getTransform()->position, m_pBrickSprite->getTransform()->position) <=200.0f)
 	{
-		if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSprite) && m_pBallSprite->getBeginSimulation())
+		if (m_pBallSprite->getShape() == CIRCLE)
 		{
-			m_pBallSprite->setCollisionType(BRICK_COLLISION);
-			m_pBallSprite->setBrickWeight(m_pBrickSprite->getMass());
-			m_pBallSprite->setBrickVelocity(m_pBrickSprite->getRigidBody()->velocity);
-			m_pBallSprite->setBrickPosition(m_pBrickSprite->getTransform()->position);
-			collisionCounter = 0;
+			checkCollisionCircle();
+		}
+		else if (m_pBallSprite->getShape() == SQUARE)
+		{
+	
+			checkCollisionSquare();
+		}
+		else if (m_pBallSprite->getShape() == TRIANGLE)
+		{
+			checkCollisionTriangle();
+		}
+		else if (m_pBallSprite->getShape() == HEXAGON)
+		{
+			checkCollisionHexagon();
 		}
 	}
-	collisionCounter++;
 }
 
 void PlayScene2::calculateAverageBrickVel()
@@ -517,4 +587,47 @@ void PlayScene2::updateStartingVelocity()
 		coordinates = Util::normalize(m_pBallSprite->getRigidBody()->velocity);
 		m_pBallSprite->getRigidBody()->velocity = coordinates * GuiSliderFloats[3] * m_PPM;
 		prevVelocity = GuiSliderFloats[3];
+}
+
+void PlayScene2::updateCollisionVariables()
+{
+	m_pBallSprite->setCollisionType(BRICK_COLLISION);
+	m_pBallSprite->setBrickWeight(m_pBrickSprite->getMass());
+	m_pBallSprite->setBrickVelocity(m_pBrickSprite->getRigidBody()->velocity);
+	m_pBallSprite->setBrickPosition(m_pBrickSprite->getTransform()->position);
+	collisionCounter = 0;
+}
+
+void PlayScene2::checkCollisionCircle()
+{
+	if (CollisionManager::circleAABBCheck(m_pBallSprite, m_pBrickSprite) && m_pBallSprite->getBeginSimulation())
+	{
+		updateCollisionVariables();
+	}
+}
+
+void PlayScene2::checkCollisionSquare()
+{
+		if (CollisionManager::AABBCheck(m_pBallSprite, m_pBrickSprite) && m_pBallSprite->getBeginSimulation())
+		{
+			updateCollisionVariables();
+		}
+
+}
+
+void PlayScene2::checkCollisionTriangle()
+{
+	if (CollisionManager::triangleAABBCheck(m_pBallSprite, m_pBrickSprite))
+	{
+		std::cout << "COLLIDING\n";
+		updateCollisionVariables();
+	}
+}
+
+void PlayScene2::checkCollisionHexagon()
+{
+	if (CollisionManager::hexagonAABBCheck(m_pBallSprite, m_pBrickSprite))
+	{
+		updateCollisionVariables();
+	}
 }

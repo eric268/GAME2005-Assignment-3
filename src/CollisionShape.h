@@ -8,7 +8,9 @@ enum CollisionShape
 	CIRCLE,
 	LINE,
 	CAPSULE,
-	RECTANGLE
+	SQUARE,
+	TRIANGLE,
+	HEXAGON,
 };
 
 #endif /* defined(__COLLISION_SHAPE__) */

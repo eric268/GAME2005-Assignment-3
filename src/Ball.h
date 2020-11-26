@@ -5,6 +5,7 @@
 #include "DisplayObject.h"
 #include "WallCollision.h"
 #include "BrickOrientation.h"
+#include "CollisionShape.h"
 class Ball final : public DisplayObject
 {
 public:
@@ -44,6 +45,7 @@ public:
 	void setBrickWidth(float);
 	void setBrickHeight(float);
 	void setCollisionJustHappened(bool);
+	void setShape(CollisionShape);
 
 	//Getters
 	WallCollison getCollisionType();
@@ -66,6 +68,7 @@ public:
 	int getHighScore();
 	float getBrickWidth();
 	float getBrickHeight();
+	CollisionShape getShape();
 
 private:
 	glm::vec2 m_direction;
@@ -89,6 +92,7 @@ private:
 	bool paddleCollisionHappened;
 	float m_paddleWeight;
 	BrickOrientation m_brickOrientation;
+	CollisionShape m_shape;
 	bool m_gravityEnabled;
 	float m_brickWidth;
 	float m_brickHeight;

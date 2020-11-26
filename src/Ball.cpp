@@ -9,6 +9,9 @@
 Ball::Ball()
 {
 	TextureManager::Instance()->load("../Assets/textures/Ball.png", "Ball");
+	TextureManager::Instance()->load("../Assets/textures/Square.png", "Square");
+	TextureManager::Instance()->load("../Assets/textures/Hexagon.png", "Hexagon");
+	TextureManager::Instance()->load("../Assets/textures/Triangle.png", "Triangle");
 
 	auto size = TextureManager::Instance()->getTextureSize("Ball");
 	setWidth(size.x);
@@ -28,31 +31,59 @@ Ball::Ball()
 	m_frameCount = 0;
 	m_PPM = 100;
 	m_momentum = glm::vec2(0.0f);
-	collisionType = NO_WALL_COLLISION;
-	setType(BALL);
 	collisionCheckCounter = 0;
 	m_collisionJustHappened = true;
 	m_brickVelocity = glm::vec2(0.0f);
 	m_paddleWeight = 0.0f;
 	paddleCollisionHappened = true;
 	m_brickPosition = glm::vec2(0.0f);
-	m_brickOrientation = HORIZONTAL;
 	m_highScore = 0;
 	m_keepUpScore = 0;
 	m_brickHeight = 0.0f;
 	m_brickWidth = 0.0f;
+
+	setType(BALL);
+	m_brickOrientation = HORIZONTAL;
+	collisionType = NO_WALL_COLLISION;
+	m_shape = CIRCLE;
 }
 
 Ball::~Ball() = default;
 
 void Ball::draw()
 {
-	// alias for x and y
 	const auto x = getTransform()->position.x;
 	const auto y = getTransform()->position.y;
 
-	// draw the target
-	TextureManager::Instance()->draw("Ball", x, y, 0, 255, true);
+	//Change size and image depending on shape selected
+	if (m_shape == CIRCLE)
+	{
+		TextureManager::Instance()->draw("Ball", x, y, 0, 255, true);
+		auto size = TextureManager::Instance()->getTextureSize("Ball");
+		setWidth(size.x);
+		setHeight(size.y);
+	}
+	else if (m_shape == SQUARE)
+	{
+		TextureManager::Instance()->draw("Square", x, y, 0, 255, true);
+		auto size = TextureManager::Instance()->getTextureSize("Square");
+		setWidth(size.x);
+		setHeight(size.y);
+	}
+	else if (m_shape == TRIANGLE)
+	{
+		TextureManager::Instance()->draw("Triangle", x, y, 0, 255, true);
+		auto size = TextureManager::Instance()->getTextureSize("Triangle");
+		setWidth(size.x);
+		setHeight(size.y);
+	}
+	else if (m_shape == HEXAGON)
+	{
+		TextureManager::Instance()->draw("Hexagon", x, y, 0, 255, true);
+		auto size = TextureManager::Instance()->getTextureSize("Hexagon");
+		setWidth(size.x);
+		setHeight(size.y);
+	}
 }
 
 void Ball::update()
@@ -64,8 +95,6 @@ void Ball::update()
 		calculateMomentum();
 		checkCollisionWalls();
 	}
-
-
 }
 
 void Ball::clean()
@@ -215,6 +244,11 @@ void Ball::setCollisionJustHappened(bool collision)
 	m_collisionJustHappened = collision;
 }
 
+void Ball::setShape(CollisionShape shape)
+{
+	m_shape = shape;
+}
+
 float Ball::getPaddleWeight()
 {
 	return m_paddleWeight;
@@ -270,14 +304,15 @@ float Ball::getBrickHeight()
 	return m_brickHeight;
 }
 
-
+CollisionShape Ball::getShape()
+{
+	return m_shape;
+}
 
 void Ball::setMomentum(glm::vec2 momentum)
 {
 	m_momentum = momentum;
 }
-
-
 
 WallCollison Ball::getCollisionType()
 {
@@ -396,11 +431,7 @@ void Ball::updateVelocity()
 			getRigidBody()->velocity.y = -getRigidBody()->velocity.y;
 			collisionType = NO_WALL_COLLISION;
 			m_collisionJustHappened = true;
-
-
 		}
-
-
 }
 
 void Ball::calculateMomentum()
@@ -430,8 +461,6 @@ void Ball::velocityAfterWallCollision()
 	getRigidBody()->velocity.y *= (1.0f - m_wallVelAbsorbtion);
 }
 
-
-
 void Ball::m_move()
 {
 	float deltaTime = 1.0f / 60.0f;
@@ -441,7 +470,7 @@ void Ball::m_move()
 		getRigidBody()->acceleration.y = m_gravity;
 		getRigidBody()->velocity += (getRigidBody()->acceleration * m_PPM) * deltaTime;
 	}
-	else
+	else if (!m_gravityEnabled)
 	{
 		getRigidBody()->acceleration = glm::vec2(0.0f);
 	}

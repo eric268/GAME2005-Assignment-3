@@ -9,6 +9,7 @@
 #include "ship.h"
 #include <GLM/gtx/norm.hpp>
 #include "SoundManager.h"
+#include "Brick.h"
 
 class CollisionManager
 {
@@ -17,6 +18,8 @@ public:
 	static bool squaredRadiusCheck(GameObject* object1, GameObject* object2);
 
 	static bool AABBCheck(GameObject* object1, GameObject* object2);
+
+	static bool AABBCheckV(GameObject* object1, GameObject* object2);
 
 	static bool lineLineCheck(glm::vec2 line1_start, glm::vec2 line1_end, glm::vec2 line2_start, glm::vec2 line2_end);
 	static bool lineRectCheck(glm::vec2 line1_start, glm::vec2 line1_end, glm::vec2 rec_start, float rect_width, float rect_height);
@@ -27,6 +30,10 @@ public:
 	static bool circleAABBCheck(GameObject* object1, GameObject* object2);
 
 	static bool pointRectCheck(glm::vec2 point, glm::vec2 rect_start, float rect_width, float rect_height);
+
+	static bool triangleAABBCheck(GameObject* obj1, GameObject* obj2);
+
+	static bool hexagonAABBCheck(GameObject* obj1, GameObject* obj2);
 	
 private:
 	CollisionManager();

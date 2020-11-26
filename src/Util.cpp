@@ -266,6 +266,13 @@ float Util::signedAngle(const glm::vec2 from, const glm::vec2 to)
 	return unsigned_angle * sign;
 }
 
+float Util::degreeToRad(float degree)
+{
+	float rad = degree * 3.14159265 / 180;
+	 
+	return rad;
+}
+
 void Util::DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 colour)
 {
 	int r = floor(colour.r * 255.0f);

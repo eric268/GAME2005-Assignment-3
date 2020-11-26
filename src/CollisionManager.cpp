@@ -52,8 +52,9 @@ bool CollisionManager::squaredRadiusCheck(GameObject* object1, GameObject* objec
 bool CollisionManager::AABBCheck(GameObject* object1, GameObject* object2)
 {
 	// prepare relevant variables
-	const auto p1 = object1->getTransform()->position;
-	const auto p2 = object2->getTransform()->position;
+	const auto p1 = glm::vec2(object1->getTransform()->position.x - (object1->getWidth() / 2), object1->getTransform()->position.y - object1->getHeight() / 2);
+	const auto p2 = glm::vec2(object2->getTransform()->position.x - (object2->getWidth() / 2), object2->getTransform()->position.y - object2->getHeight()/2);
+
 	const float p1Width = object1->getWidth();
 	const float p1Height = object1->getHeight();
 	const float p2Width = object2->getWidth();
@@ -77,6 +78,50 @@ bool CollisionManager::AABBCheck(GameObject* object1, GameObject* object2)
 				break;
 			default:
 				
+				break;
+			}
+
+			return true;
+		}
+		return false;
+	}
+	else
+	{
+		object2->getRigidBody()->isColliding = false;
+		return false;
+	}
+
+	return false;
+}
+
+bool CollisionManager::AABBCheckV(GameObject* object1, GameObject* object2)
+{
+	const auto p1 = object1->getTransform()->position;
+	const auto p2 = glm::vec2(object2->getTransform()->position.x, object2->getTransform()->position.y - object2->getHeight()/2);
+
+	const float p1Width = object1->getWidth();
+	const float p1Height = object1->getHeight();
+	const float p2Width = object2->getWidth();
+	const float p2Height = object2->getHeight();
+
+	if (
+		p1.x < p2.x + p2Width &&
+		p1.x + p1Width > p2.x &&
+		p1.y < p2.y + p2Height &&
+		p1.y + p1Height > p2.y
+		)
+	{
+		if (!object2->getRigidBody()->isColliding) {
+
+			object2->getRigidBody()->isColliding = true;
+
+			switch (object2->getType()) {
+			case TARGET:
+				std::cout << "Collision with Target!" << std::endl;
+				SoundManager::Instance().playSound("yay", 0);
+				break;
+			default:
+
 				break;
 			}
 
@@ -141,6 +186,63 @@ bool CollisionManager::lineRectCheck(const glm::vec2 line1_start, const glm::vec
 		return true;
 	}
 
+	return false;
+}
+
+bool CollisionManager::triangleAABBCheck(GameObject* obj1, GameObject* obj2)
+{
+	//Top vertex of triangle
+	const auto p1 = glm::vec2(obj1->getTransform()->position.x, obj1->getTransform()->position.y - obj1->getHeight() / 2);
+
+	//Bottom right vertex of triangle 
+	const auto p2 = glm::vec2(obj1->getTransform()->position.x + obj1->getWidth()/2 , obj1->getTransform()->position.y + obj1->getHeight() / 2 - 5.0f);
+
+	//Bottom left vertex of triangle 
+	const auto p3 = glm::vec2(obj1->getTransform()->position.x - obj1->getWidth() / 2, obj1->getTransform()->position.y + obj1->getHeight() / 2 -5.0f);
+
+	bool firstCheck = lineRectCheck(p1, p2, glm::vec2(obj2->getTransform()->position.x - obj2->getWidth()/2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool secondCheck = lineRectCheck(p2, p3, glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool thirdCheck = lineRectCheck(p3, p1, glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+
+	if (firstCheck || secondCheck || thirdCheck)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool CollisionManager::hexagonAABBCheck(GameObject* obj1, GameObject* obj2)
+{
+	float radius = obj1->getWidth()/2 - 5.0f;
+
+	glm::vec2 vertexArray[6];
+
+	//Right vertex
+	vertexArray[0] = obj1->getTransform()->position + glm::vec2(radius * cos(Util::degreeToRad(0.0f)), radius * sin(Util::degreeToRad(0.0f)));
+	//Top right vertex
+	vertexArray[1] = obj1->getTransform()->position + glm::vec2(radius * cos(Util::degreeToRad(60.0f)), radius * sin(Util::degreeToRad(60.0f)));
+	//Top left vertex
+	vertexArray[2] = obj1->getTransform()->position + glm::vec2(radius * cos(Util::degreeToRad(120.0f)), radius * sin(Util::degreeToRad(120.0f)));
+	//Left vertex
+	vertexArray[3] = obj1->getTransform()->position + glm::vec2(radius * cos(Util::degreeToRad(180.0f)), radius * sin(Util::degreeToRad(180.0f)));
+	//Bottom left vertex
+	vertexArray[4] = obj1->getTransform()->position + glm::vec2(radius * cos(Util::degreeToRad(240.0f)), radius * sin(Util::degreeToRad(240.0f)));
+	//Bottom right vertex
+	vertexArray[5] = obj1->getTransform()->position + glm::vec2(radius * cos(Util::degreeToRad(300.0f)), radius * sin(Util::degreeToRad(300.0f)));
+
+	bool firstCheck = lineRectCheck(vertexArray[0], vertexArray[1], glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool secondCheck = lineRectCheck(vertexArray[1], vertexArray[2], glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool thirdCheck = lineRectCheck(vertexArray[2], vertexArray[3], glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool fourthCheck = lineRectCheck(vertexArray[3], vertexArray[4], glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool fifthCheck = lineRectCheck(vertexArray[4], vertexArray[5], glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+	bool sixthCheck = lineRectCheck(vertexArray[5], vertexArray[0], glm::vec2(obj2->getTransform()->position.x - obj2->getWidth() / 2, obj2->getTransform()->position.y - obj2->getHeight() / 2), obj2->getWidth(), obj2->getHeight());
+
+
+	if (firstCheck || secondCheck || thirdCheck || fourthCheck || fifthCheck || sixthCheck)
+	{
+		return true;
+	}
 	return false;
 }
 

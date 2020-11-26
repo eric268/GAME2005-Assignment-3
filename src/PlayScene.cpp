@@ -168,7 +168,7 @@ void PlayScene::start()
 
 	//Load Background
 	TextureManager::Instance()->load("../Assets/textures/steel.jpg", "steel");
-
+	
 	m_updateUI();
 
 	//Target Sprite(Thermal Detonator)

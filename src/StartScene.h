@@ -30,12 +30,15 @@ private:
 	Enemy* m_arrEnemies[4];
 
 	Label* m_pName[2];
+	Label* m_pButtonLabel[2];
 
 	Player* m_pPlayer{};
 
 	Button* m_pStartButton;
 
 	Button* m_pScene2StartButton;
+
+	SDL_Color white = { 225,225,225,225 };
 };
 
 #endif /* defined (__START_SCENE__) */

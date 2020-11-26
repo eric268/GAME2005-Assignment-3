@@ -40,6 +40,7 @@ public:
 	static float angle(glm::vec2 from, glm::vec2 to);
 	static float dot(glm::vec2 lhs, glm::vec2 rhs);
 	static float signedAngle(glm::vec2 from, glm::vec2 to);
+	static float degreeToRad(float);
 
 	// debugging convenience functions
 	static void DrawLine(glm::vec2 start, glm::vec2 end, glm::vec4 colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));

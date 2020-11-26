@@ -45,10 +45,16 @@ public:
 
 	void resetScene();
 	void updateStartingVelocity();
+	void updateCollisionVariables();
+
+	void checkCollisionCircle();
+	void checkCollisionSquare();
+	void checkCollisionTriangle();
+	void checkCollisionHexagon();
 	
 	float GuiSliderFloats[5];
 
-	bool GuiSliderBools[5];
+	bool GuiSliderBools[7];
 
 private:
 	// ImGui menu variables
@@ -69,6 +75,7 @@ private:
 	Label* m_pMaxSpeedLabel;
 	Label* m_pBallMomentumLabel;
 	Label* m_pBrickMomentumLabel;
+	Label* m_pChangeSceneNote;
 
 	int collisionCounter;
 	

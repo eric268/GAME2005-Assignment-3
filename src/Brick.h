@@ -8,7 +8,6 @@ class Brick final : public DisplayObject
 {
 public:
 	Brick();
-	Brick(int);
 	~Brick();
 
 	// Inherited via GameObject
@@ -16,29 +15,24 @@ public:
 	virtual void update() override;
 	virtual void clean() override;
 
-	glm::vec2 getDirection();
-	void setDirection(glm::vec2);
-
-	float getAcceleration();
-	void setAcceleration(float);
-
-	float getForce();
-	void setForce(float);
-
-	float getMass();
-	void setMass(float);
-
-	bool getBeginSimulation();
-	void setBeginSimulation(bool);
-
-	void handleEvents();
-
 	void brickMovement(glm::vec2);
 	void calculateVelocity();
 
-	bool pause = false;
-
+	//Getters
 	BrickOrientation getOrientation();
+	glm::vec2 getDirection();
+	float getAcceleration();
+	float getForce();
+	float getMass();
+	bool getBeginSimulation();
+
+	//Setters
+	void setDirection(glm::vec2);
+	void setAcceleration(float);
+	void setForce(float);
+	void setMass(float);
+	void setBeginSimulation(bool);
+	void handleEvents();
 	void setOrientation(BrickOrientation);
 
 
@@ -50,13 +44,10 @@ private:
 	float m_acceleraton;
 	float m_force;
 	float m_mass;
-	bool m_beginSimulation;
-	int m_frameCount;
 	float m_PPM;
+	int m_frameCount;
+	bool m_beginSimulation;
 	BrickOrientation m_orientation;
-
-	int temp = 0;
-
 
 	void m_move();
 	bool m_withinBounds(glm::vec2);
