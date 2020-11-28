@@ -2,12 +2,18 @@
 #include "Game.h"
 #include "EventManager.h"
 #include "Util.h"
-#include "IMGUI_SDL/imgui_sdl.h"
 #include "Renderer.h"
+#include "IMGUI_SDL/imgui_sdl.h"
+#include "Player.h"
+#include "BulletPool.h"
 #include <iomanip>
+#include "SoundManager.h"
+#include "Bullet.h"
+#include "GameObject.h"
 
 PlayScene::PlayScene()
 {
+
 	PlayScene::start();
 }
 
@@ -16,11 +22,7 @@ PlayScene::~PlayScene()
 
 void PlayScene::draw()
 {
-	//Background
-	if (m_steelFriction)
-	{
-		TextureManager::Instance()->draw("steel", 400, 300, 0, 255, true);
-	}
+	TextureManager::Instance()->draw("Space Background", 400, 300, 0, 255, true);
 
 	drawDisplayList();
 
@@ -32,43 +34,65 @@ void PlayScene::draw()
 void PlayScene::update()
 {
 	m_updateUI();
+	SDL_GetTicks();
+	float deltaTime = 1.0f / 60.f;
 	updateDisplayList();
+	checkCollision();
+	bulletOnBulletCollision();
+	checkPlayerBulletBounds();
+	updateLabels();
 
+	if (SDL_GetTicks() - bulletSpawnTimerStart >= bulletSpawnTimerDuration)
+	{
+		SpawnBullet();
+	}
+
+	std::vector<Bullet*> activeBullets = m_pPool->all;
+	for (std::vector<Bullet*>::iterator myiter = activeBullets.begin(); myiter != activeBullets.end(); ++myiter)
+	{
+		Bullet* bullet = *myiter;
+		if (bullet->active && bullet->getTransform()->position.y >= 650)
+		{
+			m_pPool->Despawn(bullet);
+			break;
+		}
+	}
 
 	//Printing Labels
-	/*m_pVelocityLabel->setText("Velocity: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->velocity)/PPM));
-	m_pMassLabel->setText("Mass of Crate: = " + std::to_string(m_pLootCrate->getMass()) + "kg");
-	if (m_pLootCrate->getOnGround())
-	{
-		m_pDistanceLabel->setText("Distance on ground = " + std::to_string(calculateDistanceOnGround()) + "m");
-	}
-	else
-	{
-		m_pDistanceLabel->setText("Distance on ground = 0m");
-	}
+/*m_pVelocityLabel->setText("Velocity: " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->velocity)/PPM));
+m_pMassLabel->setText("Mass of Crate: = " + std::to_string(m_pLootCrate->getMass()) + "kg");
+if (m_pLootCrate->getOnGround())
+{
+	m_pDistanceLabel->setText("Distance on ground = " + std::to_string(calculateDistanceOnGround()) + "m");
+}
+else
+{
+	m_pDistanceLabel->setText("Distance on ground = 0m");
+}
 
-	if (m_pLootCrate->getOnGround())
-	{
-		m_pAccelerationLabel->setText("Acceleration = " + std::to_string(m_pLootCrate->getRigidBody()->acceleration.x) + "m/s^2");
-	}
-	else
-	{
-		m_pAccelerationLabel->setText("Acceleration = " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->acceleration)) + "m/s^2");
-	}
-	if (m_pLootCrate->getOnGround())
-	{
-		m_pForceLabel->setText("Net Force = " + std::to_string(m_pLootCrate->calculateNetForce(0,m_pLootCrate->calculateForceK())) + "N");
-	}
-	else
-	{
-		m_pForceLabel->setText("Net Force = " + std::to_string(m_pLootCrate->calculateNetForce(m_pLootCrate->calculateForceGX(), 0)) + "N");
-	}
-	
-	m_pMaxSpeed->setText("Max Speed = " + std::to_string(m_pLootCrate->getMaxSpeed()) + "m/s^2");
-	 
-	m_pPPM->setText("Scale: " + std::to_string(PPM) + " PPM");
+if (m_pLootCrate->getOnGround())
+{
+	m_pAccelerationLabel->setText("Acceleration = " + std::to_string(m_pLootCrate->getRigidBody()->acceleration.x) + "m/s^2");
+}
+else
+{
+	m_pAccelerationLabel->setText("Acceleration = " + std::to_string(Util::magnitude(m_pLootCrate->getRigidBody()->acceleration)) + "m/s^2");
+}
+if (m_pLootCrate->getOnGround())
+{
+	m_pForceLabel->setText("Net Force = " + std::to_string(m_pLootCrate->calculateNetForce(0,m_pLootCrate->calculateForceK())) + "N");
+}
+else
+{
+	m_pForceLabel->setText("Net Force = " + std::to_string(m_pLootCrate->calculateNetForce(m_pLootCrate->calculateForceGX(), 0)) + "N");
+}
 
-	m_pFrictionCoefficient->setText("Friction coefficient = " + std::to_string(m_pLootCrate->getFrictionCoefficient()));*/
+m_pMaxSpeed->setText("Max Speed = " + std::to_string(m_pLootCrate->getMaxSpeed()) + "m/s^2");
+
+m_pPPM->setText("Scale: " + std::to_string(PPM) + " PPM");
+
+m_pFrictionCoefficient->setText("Friction coefficient = " + std::to_string(m_pLootCrate->getFrictionCoefficient()));*/
+
 }
 
 void PlayScene::clean()
@@ -78,8 +102,59 @@ void PlayScene::clean()
 
 void PlayScene::handleEvents()
 {
+
 	auto& io = ImGui::GetIO();
 	auto wheel = 0;
+
+	EventManager::Instance().update();
+
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_A))
+	{
+		m_pPlayer->moveLeft();
+	}
+	else if (EventManager::Instance().isKeyDown(SDL_SCANCODE_D))
+	{
+		m_pPlayer->moveRight();
+	}
+	else {
+		m_pPlayer->stopMovingX();
+	}
+
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_W))
+	{
+		m_pPlayer->moveUp();
+	}
+	else if (EventManager::Instance().isKeyDown(SDL_SCANCODE_S))
+	{
+		m_pPlayer->moveDown();
+	}
+	else {
+		m_pPlayer->stopMovingY();
+	}
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_SPACE))
+	{
+		if (!m_pPlayer->getBulletFired())
+		{
+			m_pPlayerPool->FireBullet(m_pPlayer);
+			m_pPlayer->setBulletFired(true);
+			SoundManager::Instance().playSound("1", 0);
+		}
+		
+	}
+	if (EventManager::Instance().isKeyUp(SDL_SCANCODE_SPACE))
+	{
+		m_pPlayer->setBulletFired(false);
+	}
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_ESCAPE))
+	{
+		TheGame::Instance()->quit();
+	}
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_1))
+	{
+		TheGame::Instance()->changeSceneState(PLAY_SCENE_2);
+		ImGui::EndFrame();
+	}
+
 
 	SDL_Event event;
 	if (SDL_PollEvent(&event))
@@ -99,6 +174,9 @@ void PlayScene::handleEvents()
 		case SDL_TEXTINPUT:
 			io.AddInputCharactersUTF8(event.text.text);
 			break;
+		case SDLK_1:
+
+			break;
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym)
 			{
@@ -108,10 +186,12 @@ void PlayScene::handleEvents()
 			case SDLK_BACKQUOTE:
 				m_displayUI = (m_displayUI) ? false : true;
 				break;
+
 			}
 		case SDLK_2:
-			TheGame::Instance()->changeSceneState(PLAY_SCENE_2);
-			ImGui::EndFrame();
+			//This was making it change the scene for some reason
+			//TheGame::Instance()->changeSceneState(PLAY_SCENE_2);
+			//ImGui::EndFrame();
 			break;
 			break;
 			{
@@ -159,22 +239,35 @@ void PlayScene::handleEvents()
 
 	m_ImGuiKeyMap();
 	m_ImGuiSetStyle();
-}
 
+}
 
 void PlayScene::start()
 {
+
+	TextureManager::Instance()->load("../Assets/textures/Space Background.png", "Space Background");
+	SoundManager::Instance().load("../Assets/audio/Pew.wav", "1", SOUND_SFX);
+	SoundManager::Instance().load("../Assets/audio/Collision.wav", "2", SOUND_SFX);
+	SoundManager::Instance().load("../Assets/audio/MeteorHit.wav", "3", SOUND_SFX);
 	
 
-	//Load Background
-	TextureManager::Instance()->load("../Assets/textures/steel.jpg", "steel");
-	
+	m_pPlayer = new Player();
+	addChild(m_pPlayer);
+	initGuiVariables();
+	initLabels();
+	bulletSpawnTimerDuration = 10000.0 / 12.0f;
+	createBullets();
+
+	bulletSpawnTimerStart = SDL_GetTicks();
 	m_updateUI();
 
-	//Target Sprite(Thermal Detonator)
-	m_pLootCrate = new Target();
-	m_pLootCrate->setParent(this);
-	addChild(m_pLootCrate);
+	// Player Sprite
+
+
+	//If you want to be able to have a max of 30 bullets 
+
+	
+	
 
 
 	// Label
@@ -182,22 +275,6 @@ void PlayScene::start()
 	//m_pDistanceLabel = new Label("Distance", "Consolas", 20, black, glm::vec2(596.0f, 30.0f));
 	//m_pDistanceLabel->setParent(this);
 	//addChild(m_pDistanceLabel);
-
-	//m_pAccelerationLabel = new Label("Acceleration: ", "Consolas", 20, black, glm::vec2(632.0f, 70.0f));
-	//m_pAccelerationLabel->setParent(this);
-	//addChild(m_pAccelerationLabel);
-
-	//m_pVelocityLabel = new Label("Velocity: ", "Consolas", 20, black, glm::vec2(599.0f, 110.0f));
-	//m_pVelocityLabel->setParent(this);
-	//addChild(m_pVelocityLabel);
-
-	//m_pMaxSpeed = new Label("Max Speed: 0", "Consolas", 20, black, glm::vec2(583.0f, 150.0f));
-	//m_pMaxSpeed->setParent(this);
-	//addChild(m_pMaxSpeed);
-
-	//m_pMassLabel = new Label("Mass: ", "Consolas", 20, black, glm::vec2(583.0f, 190.0f));
-	//m_pMassLabel->setParent(this);
-	//addChild(m_pMassLabel);
 
 	//m_pForceLabel = new Label("Force: ", "Consolas", 20, black, glm::vec2(571.0f, 230.0f));
 	//m_pForceLabel->setParent(this);
@@ -211,18 +288,67 @@ void PlayScene::start()
 	//m_pFrictionCoefficient->setParent(this);
 	//addChild(m_pFrictionCoefficient);
 
-	
+	resetSceneSettings(); // nn change definition of function!!!!
 
-	resetSceneSettings();
 }
+
 float PlayScene::getPPM()
 {
 	return PPM;
 }
+
+void PlayScene::checkCollision()
+{
+	for (std::vector<Bullet*>::iterator myiter = m_pPool->all.begin(); myiter != m_pPool->all.end(); ++myiter)
+	{
+		Bullet* bullet = *myiter;
+		if (bullet->active)
+		{
+			if (CollisionManager::AABBCheck(bullet, m_pPlayer))
+			{
+				if (bullet->getPlaySound())
+				{
+					std::cout << "COLLIDING!!!!\n";
+						
+						bullet->setPlaySound(false);
+						SoundManager::Instance().playSound("2", 0);
+						//If you want bullet to disappear
+						m_pPool->Despawn(bullet);
+						if (m_currentScore > m_highScore)
+						{
+							m_highScore = m_currentScore;
+							m_currentScore = 0;
+						}
+				}
+
+				//Do something with ship as well
+			}
+		}
+	}
+}
+
+void PlayScene::initGuiVariables()
+{
+	GuiBoolValues[0] = false; // Begin simulation
+	GuiBoolValues[1] = false; // Change Scene
+	GuiBoolValues[2] = true;  // Max 10 bullets
+	GuiBoolValues[3] = false; // Max 20 bullets
+	GuiBoolValues[4] = false; // Max 30 bullets
+
+	GuiFloatValues[0] = 10.0f; //Number of bullets 
+	GuiFloatValues[1] = 9.8f;  // gravity
+	GuiFloatValues[2] = 5.0f;  //Player bullet speed
+	GuiFloatValues[3] = 50.0f; //Player acceleration speed
+
+	m_currentScore = 0;
+	m_highScore = 0;
+}
+
 void PlayScene::beginSimulation()
 {
 
 }
+
 void PlayScene::resetSceneSettings()
 {
 
@@ -253,34 +379,101 @@ void PlayScene::resetCrateSettings()
 
 void PlayScene::checkGuiChangs()
 {
-	if (ImGui::Button("Button Temp"))
+	if (ImGui::Button("Begin Simulation"))
 	{
-		//beginSimulation();
+		GuiBoolValues[0] = true;
+		setBulletBeginSim(true);
+		m_pPlayer->setBeginSimulation(true);
 	}
 	ImGui::SameLine();
-
-	
-	if (ImGui::Checkbox("CheckBox temp", &m_steelFriction))
+	if (ImGui::Button("Pause Simulation"))
 	{
+		GuiBoolValues[0] = false;
+		setBulletBeginSim(false);
+		m_pPlayer->setBeginSimulation(false);
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Reset Simulation"))
+	{
+		GuiBoolValues[0] = false;
+		for (std::vector<Bullet*>::iterator myiter = m_pPool->all.begin(); myiter != m_pPool->all.end(); ++myiter)
+		{
+			Bullet* bullet = *myiter;
+			bullet->setBeginSimulation(false);
+			if (bullet->active)
+			{
+				m_pPool->Despawn(bullet);
+			}
+		}
+		m_pPlayer->setBeginSimulation(false);
+		m_currentScore = 0;
+		m_highScore = 0;
+	}
 
+
+	if (ImGui::Checkbox("10 Meteors Total", &GuiBoolValues[2]))
+	{
+		if (GuiBoolValues[2])
+		{
+			GuiBoolValues[3] = false;
+			GuiBoolValues[4] = false;
+			bulletSpawnTimerDuration = 10000.0 / 12.0f;
+		}
+		checkOneBoxTrue(GuiBoolValues[2]);
+	}
+	if (ImGui::Checkbox("20 Meteors Total", &GuiBoolValues[3]))
+	{
+		if (GuiBoolValues[3])
+		{
+			GuiBoolValues[2] = false;
+			GuiBoolValues[4] = false;
+			bulletSpawnTimerDuration = 10000.0 / 26.0f;
+		}
+		checkOneBoxTrue(GuiBoolValues[3]);
+	}
+	if (ImGui::Checkbox("30 Meteors Total", &GuiBoolValues[4]))
+	{
+		if (GuiBoolValues[4])
+		{
+			GuiBoolValues[3] = false;
+			GuiBoolValues[2] = false;
+			bulletSpawnTimerDuration = 10000.0 / 41.0f;
+		}
+		checkOneBoxTrue(GuiBoolValues[4]);
+	}
+
+	if (ImGui::SliderFloat("Player Bullet Speed ", &GuiFloatValues[2], 3, 6));
+	{
+		if (GuiFloatValues[2] != m_pPlayerPool->all[0]->getPlayerBulletSpeed())
+		{
+			for (std::vector<Bullet*>::iterator myiter = m_pPlayerPool->all.begin(); myiter != m_pPlayerPool->all.end(); ++myiter)
+			{
+				Bullet* bullet = *myiter;
+				bullet->setPlayerBulletSpeed(GuiFloatValues[2]);
+			}
+		}
+	}
+	if (ImGui::SliderFloat("Player Acceleration ", &GuiFloatValues[3], 25.0f, 250.0f));
+	{
+		if (GuiFloatValues[3] != m_pPlayer->getAcceleration())
+		{
+			m_pPlayer->setAcceleration(GuiFloatValues[3]);
+		}
 	}
 	// Slider Settings
-	if (ImGui::SliderFloat("Slider Temp ", &m_rampPos, 0, 4));
+	if (ImGui::SliderFloat("Gravity ", &GuiFloatValues[1], 9.8, 30));
 	{
-		
+		if (m_pPool->all[0]->getGravity() != GuiFloatValues[1])
+		{
+			for (std::vector<Bullet*>::iterator myiter = m_pPool->all.begin(); myiter != m_pPool->all.end(); ++myiter)
+			{
+				Bullet* bullet = *myiter;
+				bullet->setGravity(GuiFloatValues[1]);
+			}
+		}
 	}
 
 }
-
-float PlayScene::calculateDistanceOnGround()
-{
-	return 1;
-}
-bool PlayScene::noFrictionSelected()
-{
-	return (!m_iceFriction && !m_steelFriction && !m_grassFriction && !m_glassFriction);
-}
-// ImGui functions ***********************************************
 
 void PlayScene::m_ImGuiKeyMap()
 {
@@ -361,7 +554,7 @@ void PlayScene::m_updateUI()
 	// Prepare Window Frame
 	ImGui::NewFrame();
 
-	ImGui::Begin("Settings ", NULL, ImGuiWindowFlags_AlwaysAutoResize  | ImGuiWindowFlags_MenuBar);
+	ImGui::Begin("Settings ", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_MenuBar);
 
 	// set window to top getLeft corner
 	ImGui::SetWindowPos(ImVec2(0, 0), true);
@@ -397,5 +590,148 @@ void PlayScene::m_updateUI()
 
 	// Main Window End
 	ImGui::End();
+}
+
+void PlayScene::createBullets()
+{
+	m_pPool = new BulletPool(30);
+	for (std::vector<Bullet*>::iterator myiter = m_pPool->all.begin(); myiter != m_pPool->all.end(); ++myiter)
+	{
+		Bullet* bullet = *myiter;
+		bullet->setParent(this);
+		addChild(bullet);
+	}
+
+	m_pPlayerPool = new BulletPool(50);
+	for (std::vector<Bullet*>::iterator myiter = m_pPlayerPool->all.begin(); myiter != m_pPlayerPool->all.end(); ++myiter)
+	{
+		Bullet* bullet = *myiter;
+		bullet->setParent(this);
+		addChild(bullet);
+		bullet->setBulletType(PLAYER_BULLET);
+	}
+}
+
+void PlayScene::SpawnBullet()
+{
+	if (GuiBoolValues[0])
+	{
+		Bullet* bullet = m_pPool->Spawn();
+		if (bullet)
+		{
+			bullet->getTransform()->position = glm::vec2(50 + rand() % 700, 0);
+		}
+
+		bulletSpawnTimerStart = SDL_GetTicks();
+	}
+}
+
+void PlayScene::setBulletBeginSim(bool beginSim)
+{
+	for (std::vector<Bullet*>::iterator myiter = m_pPool->all.begin(); myiter != m_pPool->all.end(); ++myiter)
+	{
+		Bullet* bullet = *myiter;
+		bullet->setBeginSimulation(beginSim);
+	}
+}
+
+void PlayScene::checkPlayerBulletBounds()
+{
+	for (std::vector<Bullet*>::iterator myiter = m_pPlayerPool->all.begin(); myiter != m_pPlayerPool->all.end(); ++myiter)
+	{
+		Bullet* bullet = *myiter;
+		if (bullet->active)
+		{
+			if (bullet->getTransform()->position.y <= -100.0f)
+			{
+				m_pPlayerPool->Despawn(bullet);
+			}
+		}
+	}
+}
+
+void PlayScene::bulletOnBulletCollision()
+{
+	for (std::vector<Bullet*>::iterator myiter = m_pPool->all.begin(); myiter != m_pPool->all.end(); ++myiter)
+	{
+		Bullet* enemyBullet = *myiter;
+		if (enemyBullet->active)
+		{
+			for (std::vector<Bullet*>::iterator playerIter = m_pPlayerPool->all.begin(); playerIter != m_pPlayerPool->all.end(); ++playerIter)
+			{
+				Bullet* playerBullet = *playerIter;
+				if (playerBullet->active)
+				{
+					if (CollisionManager::AABBCheck(playerBullet, enemyBullet))
+					{
+						m_pPool->Despawn(enemyBullet);
+						m_pPlayerPool->Despawn(playerBullet);
+						SoundManager::Instance().playSound("3", 0);
+						m_currentScore++;
+					}
+				}
+			}
+		}
+	}
+}
+
+void PlayScene::initLabels()
+{
+	SDL_Color white = { 225,225,225,225 };
+
+	m_pHighScoreLabel = new Label("High Score: ", "Consolas", 20, white, glm::vec2(600.0f, 100.0f));
+	m_pHighScoreLabel->setParent(this);
+	addChild(m_pHighScoreLabel);
+
+	m_pCurrentScoreLabel = new Label("Current Score: ", "Consolas", 20, white, glm::vec2(600.0f, 140.0f));
+	m_pCurrentScoreLabel->setParent(this);
+	addChild(m_pCurrentScoreLabel);
+
+	m_pChangeSceneNote = new Label("Press 1 to change scene", "Consolas", 15, white, glm::vec2(110.0f, 580.0f));
+	m_pChangeSceneNote->setParent(this);
+	addChild(m_pChangeSceneNote);
+
+	m_pPPM = new Label("Scale: 10 PPM", "Consolas", 15, white, glm::vec2(730.0f, 580.0f));
+	m_pPPM->setParent(this);
+	addChild(m_pPPM);
+
+	//------------------------------------
+
+	m_pShipMomentumLabel = new Label("Ship Momentum: ", "Consolas", 20, white, glm::vec2(600.0f, 180.0f));
+	m_pShipMomentumLabel->setParent(this);
+	addChild(m_pShipMomentumLabel);
+
+	m_pShipVelocityLabel = new Label("Ship Velocity: ", "Consolas", 20, white, glm::vec2(600.0f, 220.0f));
+	m_pShipVelocityLabel->setParent(this);
+	addChild(m_pShipVelocityLabel);
+
+	m_pMassLabel = new Label("Ship Mass: 2,030,000 kg ", "Consolas", 20, white, glm::vec2(600.0f, 260.0f));  // Fixed mass label - the weight of a space shuttle
+	m_pMassLabel->setParent(this);
+	addChild(m_pMassLabel);
+
+}
+
+void PlayScene::updateLabels()
+{
+	m_pHighScoreLabel->setText("High Score: " + std::to_string(m_highScore));
+	m_pCurrentScoreLabel->setText("Current Score: " +std::to_string(m_currentScore));
+	
+	if (mass < (Util::magnitude(m_pPlayer->getRigidBody()->velocity * mass) / PPM))
+	{
+		m_pShipMomentumLabel->setText("Ship Momentum: " + std::to_string(Util::magnitude(m_pPlayer->getRigidBody()->velocity * mass) / PPM) + " kg*m/s");
+	}
+	else
+		m_pShipMomentumLabel->setText("Ship Momentum: " + std::to_string(mass) + " kg*m/s");
+
+		m_pShipVelocityLabel->setText("Ship Velocity: " + std::to_string(Util::magnitude(m_pPlayer->getRigidBody()->velocity) / PPM) + " m/s^2");
+	
+}
+
+void PlayScene::checkOneBoxTrue(bool& check)
+{
+	if (!GuiBoolValues[2] || !GuiBoolValues[3] || !GuiBoolValues[4])
+	{
+		check = true;
+	}
 }
 

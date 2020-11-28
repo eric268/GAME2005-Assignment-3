@@ -165,9 +165,10 @@
     <ClCompile Include="..\include\IMGUI_SDL\imgui_sdl.cpp" />
     <ClCompile Include="..\src\Ball.cpp" />
     <ClCompile Include="..\src\Brick.cpp" />
+    <ClCompile Include="..\src\Bullet.cpp" />
+    <ClCompile Include="..\src\BulletPool.cpp" />
     <ClCompile Include="..\src\Button.cpp" />
     <ClCompile Include="..\src\CollisionManager.cpp" />
-    <ClCompile Include="..\src\Enemy.cpp" />
     <ClCompile Include="..\src\PlayScene2.cpp" />
     <ClCompile Include="..\src\Sprite.cpp" />
     <ClCompile Include="..\src\UIControl.cpp" />
@@ -205,11 +206,13 @@
     <ClInclude Include="..\src\Ball.h" />
     <ClInclude Include="..\src\Brick.h" />
     <ClInclude Include="..\src\BrickOrientation.h" />
+    <ClInclude Include="..\src\Bullet.h" />
+    <ClInclude Include="..\src\BulletPool.h" />
+    <ClInclude Include="..\src\BulletType.h" />
     <ClInclude Include="..\src\Button.h" />
     <ClInclude Include="..\src\CollisionManager.h" />
     <ClInclude Include="..\src\CollisionShape.h" />
     <ClInclude Include="..\src\Config.h" />
-    <ClInclude Include="..\src\Enemy.h" />
     <ClInclude Include="..\src\PlayScene2.h" />
     <ClInclude Include="..\src\SoundType.h" />
     <ClInclude Include="..\src\Sprite.h" />
